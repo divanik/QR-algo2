@@ -38,11 +38,12 @@ int main() {
 
  //   cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl;
     
-    pair<bool, double> kk = Rayleigh_shift<double>(uni, matr, 1e-10, 10000);
+    bool kk = Wilkinson_double_shift<double>(uni, matr, 1e-10, 1'000'000);
 
-    cout << kk.second << endl << endl;
+    cout << kk << endl << endl;
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl;
+    cout << matr << endl;
 
 
 }
