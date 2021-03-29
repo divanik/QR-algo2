@@ -65,7 +65,7 @@ void simple_wilkinson_step (Eigen::MatrixX<T>* Unit,
 
 //to debug
 template<typename T>
-void double_wilkinson_step (Eigen::MatrixX<T>& Unit, Eigen::MatrixX<T>& Center) {
+void double_wilkinson_step (Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center) {
 
     size_t size = center.rows();
 
@@ -78,10 +78,12 @@ void double_wilkinson_step (Eigen::MatrixX<T>& Unit, Eigen::MatrixX<T>& Center) 
                 - Center(size - 2, size - 1) * Center(size - 1, size - 2);
 
     Eigen::VectorX<T> hvec = Center.col(0).head(3);
+    Eigen::VectorX<T> hvec2 = hvec;
+    hvec2(2, 0) = 0;
     Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(3);
 
     e1(0) = 1;
-    Eigen::VectorX<T> to_get = center.block(0, 0, 3, 3) * hvec - 2 * real(trace) * hvec.head(3) + abs(det) * abs(det) * e1;
+    Eigen::VectorX<T> to_get = center.block(0, 0, 3, 3) * hvec - trace * hvec2 + det * e1;
 
     Householder_reflection<T> p0 = {find_householder_reflector(to_get), 0};
 
@@ -113,48 +115,38 @@ void implicit_symmetrical_step (Eigen::MatrixX<T>& Unit, Eigen::MatrixX<T>& Cent
         return;
     }
 
-    T shift = (*Center)(size - 1, size - 1);
+    T shift = ((*Center)(size - 2, size - 2) - (*Center)(size - 1, size - 1);
+    T b = (*Center)(size - 1, size - 2);
+    if (shift == T(0)) {
+        shift -= b;
+    } else {
+        T sign = shift / abs(shift);
+        shift -= (b * b) / (shift + sign * sqrt(shift * shift + b * b));
+    }
 
     Eigen::VectorX<T> hvec = Center.col(0).head(2);
-    Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(3);
 
-    e1(0) = 1;
-    Eigen::VectorX<T> to_get = center.block(0, 0, 3, 3) * hvec - 2 * real(trace) * hvec.head(3) + abs(det) * abs(det) * e1;
+    std::vector< Given_rotation<T> > p0 = {find_given_rotations(to_get), 1};
 
-    Given_rotation<T> p0 = {find_given_rotations(to_get), 0};
+    left_multiply(center, p0[0]);
 
-    left_multiply(center, p0);
+    right_multiply(center, p0[0]);
 
-    right_multiply(center, p0);
-
-    right_multiply(unit, p0);
+    right_multiply(unit, p0[0]);
 
     for (size_t i = 0; i < size - 2; i++) {
-        size_t block_size = min(static_cast<size_t>(3), size - i - 1);
+        size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center.block(i + 1, i, block_size, 1);
 
-        Householder_reflection<T> p = {find_reflector(current_vec), i + 1};
-        left_multiply(center, p);
+        Householder_reflection<T> p = {find_given_rotations(current_vec), i + 1};
 
-        right_multiply(center, p);
+        left_multiply(center, p[0]);
 
-        right_multiply(unit, p);
+        right_multiply(center, p[0]);
+
+        right_multiply(unit, p[0]);
     }
 }
 
-
-
-
-/* important part
-
-template<typename T>
-void hessenberg_QR(Eigen::MatrixX<T>& Unit, Eigen::MatrixX<T>& Center, const size_t steps_number) {
-    typename Eigen::MatrixX<T> answer = Center;
-    for (size_t step = 0; step < steps_number; step++) {
-        single_step_hessenberg_QR(Unit, Center);
-    }
-}
-
-*/
 
 }
