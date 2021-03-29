@@ -42,14 +42,14 @@ std::vector<Given_rotation<T>> find_givens_rotations(const Eigen::VectorX<T>& ve
         T a = vect(p);
         T c = vect(i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
-        if (len == T(0)) {
-            continue;
+        Given_rotation<T> rotate  = {p, i, T(1), T(0)};
+        if (len != T(0)) {
+            rotate = {
+                p, i,
+                a / sqrt(abs(a) * abs(a) + abs(c) * abs(c)),
+                c / sqrt(abs(a) * abs(a) + abs(c) * abs(c))
+            };
         }
-        Given_rotation<T> rotate = {
-            p, i,
-            a / sqrt(abs(a) * abs(a) + abs(c) * abs(c)),
-            c / sqrt(abs(a) * abs(a) + abs(c) * abs(c))
-        };
         rotates.push_back(rotate);
         //std::cout << matr << std::endl;
     }

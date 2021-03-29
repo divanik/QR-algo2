@@ -44,16 +44,22 @@ Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Given_rotation<
 
 
 template<typename T>
-Eigen::MatrixX<T>& left_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+void left_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+    if (matr == nullptr) {
+        return;
+    }
     const Eigen::RowVectorX<T> covec1 = matr->row(giv_rot.fir_ind);
     const Eigen::RowVectorX<T> covec2 = matr->row(giv_rot.sec_ind);
     matr->row(giv_rot.fir_ind) = ((conjugate(giv_rot.cos) * covec1) + (conjugate(giv_rot.sin) * covec2));
     matr->row(giv_rot.sec_ind) = ((giv_rot.cos * covec2) - (giv_rot.sin * covec1));
-    return matr;
+    return;
 }
 
 template<typename T>
-Eigen::MatrixX<T>& right_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+void right_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+    if (matr == nullptr) {
+        return;
+    }
     const Eigen::VectorX<T>  vec1 = matr->col(giv_rot.fir_ind);
     const Eigen::VectorX<T>  vec2 = matr->col(giv_rot.sec_ind);
     matr->col(giv_rot.fir_ind) = (conjugate(giv_rot.cos) * vec1) - (giv_rot.sin * vec2);
