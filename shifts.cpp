@@ -1,5 +1,5 @@
-#include "hessenberg.h"
-#include "householder_reflections.h"
+#include "given_rotation.h"
+#include "householder_reflection.h"
 #include "shifts.h"
 
 #include<iostream>      
@@ -7,9 +7,7 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace Hessenberg;
-using namespace Householder_reflections;
-using namespace Shifts;
+using namespace QR_algorithm;
 
 int main() {
     MatrixXd matr(4, 4);
@@ -21,7 +19,7 @@ int main() {
 
     auto matr_conserve = matr;
 
-    //House_refl<double> kek = {vec};
+    //Householder_reflection<double> kek = {vec};
 
     //cout << matr << endl << endl;
     //cout << matr * kek << endl << endl;

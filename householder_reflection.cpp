@@ -1,13 +1,12 @@
-#include "hessenberg.h"
-#include "householder_reflections.h"
+#include "given_rotation.h"
+#include "householder_reflection.h"
 
 #include<iostream>      
 #include<Eigen/Core>
 
 using namespace std;
 using namespace Eigen;
-using namespace Hessenberg;
-using namespace Householder_reflections;
+using namespace QR_algorithm;
 
 int main() {
     MatrixXd matr(4, 4);
@@ -20,7 +19,7 @@ int main() {
 
     auto matr_conserve = matr;
 
-    //House_refl<double> kek = {vec};
+    //Householder_reflection<double> kek = {vec};
 
     //cout << matr << endl << endl;
     //cout << matr * kek << endl << endl;
@@ -32,12 +31,12 @@ int main() {
 
     cout << uni * matr * uni.adjoint() - matr << endl;*/
 
-    make_hessenberg_form<double>(uni, matr);
+    //make_hessenberg_form<double>(uni, matr);
     cout << matr << endl << endl;
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl;
     
-    hessenberg_QR<double>(uni, matr, 100);
+    //hessenberg_QR<double>(uni, matr, 100);
 
     cout << matr << endl << endl;
 

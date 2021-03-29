@@ -1,10 +1,10 @@
-#include "hessenberg.h"
+#include "given_rotation.h"
 #include<iostream>      
 #include<Eigen/Core>
 
 using namespace std;
 using namespace Eigen;
-using namespace Hessenberg;
+using namespace QR_algorithm;
 
 int main() {
     MatrixXd matr(4, 4);
@@ -31,7 +31,7 @@ int main() {
     //Given_Rot<float> kek = {0, 1, 0.6, -0.8};
     //cout << left_multiply(uni, kek) << endl;
 
-    hessenberg_QR<double>(uni, matr, 1000);
+    //hessenberg_QR<double>(uni, matr, 1000);
     cout << uni * matr * uni.transpose() - ini << endl;
     cout << matr << endl;
 }
