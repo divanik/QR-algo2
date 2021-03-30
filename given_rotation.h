@@ -1,7 +1,9 @@
 #pragma once
 
+#include "conjugate.h"
+
 #include<iostream>
-#include<Eigen/Core>
+#include"Eigen/Core"
 #include<vector>
 
 namespace QR_algorithm {
@@ -19,6 +21,14 @@ public:
 
 };
 
+double conjugate (double a) {
+    return a;
+}
+
+float conjugate (float a) {
+    return a;
+}
+
 template<typename T>
 std::ostream& operator<< (std::ostream& os, const Given_rotation<T>& gr) {
     os << "giv_rot: [" <<
@@ -33,13 +43,13 @@ std::ostream& operator<< (std::ostream& os, const Given_rotation<T>& gr) {
 template<typename T>
 Eigen::MatrixX<T> operator*(const Given_rotation<T>& giv_rot, const Eigen::MatrixX<T>& matr) {
     auto answer = matr;
-    return (left_multiply(answer, giv_rot));
+    return (left_multiply(&answer, giv_rot));
 }
 
 template<typename T>
 Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Given_rotation<T>& giv_rot) {
     auto answer = matr;
-    return (right_multiply(answer, giv_rot));
+    return (right_multiply(&answer, giv_rot));
 }
 
 
@@ -64,7 +74,7 @@ void right_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
     const Eigen::VectorX<T>  vec2 = matr->col(giv_rot.sec_ind);
     matr->col(giv_rot.fir_ind) = (conjugate(giv_rot.cos) * vec1) - (giv_rot.sin * vec2);
     matr->col(giv_rot.sec_ind) = (giv_rot.cos * vec2) + (conjugate(giv_rot.sin) * vec1);
-    return matr;
+    return;
 }
 
 }

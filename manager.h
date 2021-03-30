@@ -1,3 +1,5 @@
+#pragma once
+
 #include "given_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
@@ -18,6 +20,7 @@ class Manager {
         GENERAL
     } symmetry;
     size_t max_iterations;
+    bool make_each_step_zeros = true;
 };
 
 

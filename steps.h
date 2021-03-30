@@ -14,7 +14,7 @@ void fill_hessenberg_zeros(Eigen::MatrixX<T>* Center) {
 }
 
 template<typename T>
-void givens_step(Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center) {
+void givens_step(Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center, bool make_each_step_zeros) {
     typename std::vector<Given_rotation<T>> rotates;
     size_t sz = Center->rows();
     rotates.reserve(sz - 1);
@@ -35,6 +35,9 @@ void givens_step(Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center) {
         right_multiply(Center, x);
         right_multiply(Unit, x);
     }
+    if (make_each_step_zeros) {
+        fill_hessenberg_zeros(Center);
+    }
     return rotates;
 }
 
@@ -44,7 +47,10 @@ void rayleigh_step (Eigen::MatrixX<T>* Unit,
     T shift = (*Center)(size - 1, size - 1);
     Center -= shift * Eigen::MatrixX<T>::Identity(size, size);
     givens_step(Unit, Center);
-    Center += shift * Eigen::MatrixX<T>::Identity(size, size);    
+    Center += shift * Eigen::MatrixX<T>::Identity(size, size); 
+    if (make_each_step_zeros) {
+        fill_hessenberg_zeros(Center);
+    }   
 }
 
 template<typename T>
@@ -61,6 +67,9 @@ void simple_wilkinson_step (Eigen::MatrixX<T>* Unit,
     Center -= shift * Eigen::MatrixX<T>::Identity(sz, sz);
     givens_step(Unit, Center);
     Center += shift * Eigen::MatrixX<T>::Identity(sz, sz);    
+    if (make_each_step_zeros) {
+        fill_hessenberg_zeros(Center);
+    }
 }
 
 //to debug
@@ -104,6 +113,9 @@ void double_wilkinson_step (Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center) 
 
         right_multiply(unit, p);
     }
+    if (make_each_step_zeros) {
+        fill_hessenberg_zeros(Center);
+    }
 }
 
 template<typename T>
@@ -145,6 +157,10 @@ void implicit_symmetrical_step (Eigen::MatrixX<T>& Unit, Eigen::MatrixX<T>& Cent
         right_multiply(center, p[0]);
 
         right_multiply(unit, p[0]);
+    }
+
+    if (make_each_step_zeros) {
+        fill_hessenberg_zeros(Center);
     }
 }
 

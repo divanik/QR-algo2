@@ -1,7 +1,9 @@
 #pragma once
 
+
+#include"Eigen/Core"
+
 #include<iostream>
-#include<Eigen/Core>
 #include<vector>
 
 namespace  QR_algorithm {
@@ -36,42 +38,42 @@ std::ostream& operator<< (std::ostream& os, const Householder_reflection<T>& hr)
 template<typename T>
 Eigen::MatrixX<T> operator*(const Householder_reflection<T>& hou_refl, const Eigen::MatrixX<T>& matr) {
     auto answer = matr;
-    return (left_multiply(answer, hou_refl));
+    return (left_multiply(&answer, hou_refl));
 }
 
 template<typename T>
 Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Householder_reflection<T>& hou_refl) {
     auto answer = matr;
-    return (right_multiply(answer, hou_refl));
+    return (right_multiply(&answer, hou_refl));
 }
 
 
 template<typename T>
-Eigen::MatrixX<T>& left_multiply(Eigen::MatrixX<T>& matr, const Householder_reflection<T>& hou_refl) {
+void left_multiply(Eigen::MatrixX<T>* matr, const Householder_reflection<T>& hou_refl) {
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
-    Eigen::MatrixX<T> subrows = matr.block(beg, 0, size, matr.cols());
+    Eigen::MatrixX<T> subrows = matr->block(beg, 0, size, matr->cols());
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subrows = u.adjoint() * subrows;
     subrows = u * subrows;
     for (auto i = 0; i < size; i++) {
-        matr.row(beg + i) -= 2 * subrows.row(i);
+        matr->row(beg + i) -= 2 * subrows.row(i);
     }
-    return matr;
+    return;
 }
 
 template<typename T>
-Eigen::MatrixX<T>& right_multiply(Eigen::MatrixX<T>& matr, const Householder_reflection<T>& hou_refl) {
+void right_multiply(Eigen::MatrixX<T>* matr, const Householder_reflection<T>& hou_refl) {
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
-    Eigen::MatrixX<T> subcols = matr.block(0, beg, matr.rows(), size);
+    Eigen::MatrixX<T> subcols = matr->block(0, beg, matr->rows(), size);
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subcols = subcols * u;
     subcols = subcols * u.adjoint();
     for (auto i = 0; i < size; i++) {
-        matr.col(beg + i) -= 2 * subcols.col(i);
+        matr->col(beg + i) -= 2 * subcols.col(i);
     }
-    return matr;
+    return;
 }
 
 }

@@ -1,5 +1,8 @@
+#pragma once
+
 #include "given_rotation.h"
 #include "householder_reflection.h"
+#include "Eigen/Core"
 
 enum HESSENBERG_TRANSFORM {
     HOUSEHOLDER_REFLECTION,
@@ -7,8 +10,6 @@ enum HESSENBERG_TRANSFORM {
 };
 
 namespace QR_algorithm {
-
-
 
 template<typename T>
 Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& object, 
@@ -26,7 +27,7 @@ Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& ob
     if (num.norm() != T(0)) {                     // (abs(x1) < eps)
         num /= num.norm();
     }
-    Householder_reflection<T> cur_refl = {current_vec, beginning};
+    Householder_reflection<T> cur_refl = {num, beginning};
     return {num, beginning};
 }
 
@@ -35,7 +36,8 @@ std::vector<Given_rotation<T>> find_givens_rotations(const Eigen::VectorX<T>& ve
     if (bottom = 0) {
         bottom = 1;
     }
-    size_t sz = object.size();
+    size_t sz = vect.size();
+    std::vector<Given_rotation<T>> rotates;
     rotates.reserve(sz - 1);
     size_t p = bottom - 1;
     for (size_t i = bottom; i < sz; i++) {
@@ -57,34 +59,34 @@ std::vector<Given_rotation<T>> find_givens_rotations(const Eigen::VectorX<T>& ve
 }
 
 template<typename T>
-void make_hessenberg_form(Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center, HESSENBERG_TRANSFORM ht) {
-    size_t size = center.rows();
+void make_hessenberg_form(Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center, HESSENBERG_TRANSFORM ht) {
+    size_t size = Center->rows();
     if (ht == HOUSEHOLDER_REFLECTION) {
         for (size_t i = 0; i < size - 2; i++) {
 
-            Eigen::VectorX<T> current_vec = center.block(i + 1, i, size - i - 1, 1);
+            Eigen::VectorX<T> current_vec = Center->block(i + 1, i, size - i - 1, 1);
 
-            cur_refl = find_householder_reflector(current_vec, i + 1);
+            Householder_reflection cur_refl = find_householder_reflector(current_vec, i + 1);
 
-            left_multiply(center, cur_refl);
+            left_multiply(Center, cur_refl);
 
-            right_multiply(center, cur_refl);
+            right_multiply(Center, cur_refl);
 
-            right_multiply(unit, cur_refl);
+            right_multiply(Unit, cur_refl);
         }
     } else if (ht == GIVENS_ROTATION) {
         for (size_t i = 0; i < size - 2; i++) {
 
-            Eigen::VectorX<T> current_vec = center.block(i + 1, i, size - i - 1, 1);
+            Eigen::VectorX<T> current_vec = Center->block(i + 1, i, size - i - 1, 1);
 
             std::vector<Given_rotation<T>> cur_rots = find_givens_rotations(current_vec, 1);
 
             for (auto& x : cur_rots) {
-                left_multiply(center, x);
+                left_multiply(Center, x);
 
-                right_multiply(center, x.adjacent());
+                right_multiply(Center, x.adjacent());
 
-                right_multiply(unit, x.adjacent());
+                right_multiply(Unit, x.adjacent());
             }
 
         }     
