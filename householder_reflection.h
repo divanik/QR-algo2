@@ -49,7 +49,7 @@ Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Householder_ref
 
 
 template<typename T>
-void left_multiply(Eigen::MatrixX<T>* matr, const Householder_reflection<T>& hou_refl) {
+void left_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>* matr) {
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
     Eigen::MatrixX<T> subrows = matr->block(beg, 0, size, matr->cols());
@@ -63,7 +63,7 @@ void left_multiply(Eigen::MatrixX<T>* matr, const Householder_reflection<T>& hou
 }
 
 template<typename T>
-void right_multiply(Eigen::MatrixX<T>* matr, const Householder_reflection<T>& hou_refl) {
+void right_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>* matr) {
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
     Eigen::MatrixX<T> subcols = matr->block(0, beg, matr->rows(), size);

@@ -1,6 +1,7 @@
 #include "given_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
+#include "steps.h"
 #include "Eigen/Core"
 
 using namespace Eigen;
@@ -17,7 +18,7 @@ int main() {
 
     make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
 
-    double err = 0;
+    /*double err = 0;
     for (int i = 0; i < size - 2; i++) {
         for (int j = i + 2; j < size; j++) {
             err += abs(matr(j, i)) * abs(matr(j, i));
@@ -25,8 +26,18 @@ int main() {
     }
 
     err = sqrt(err);
-    cout << err << endl << endl;
+    cout << err << endl << endl;*/
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
+
+    cout << matr << endl << endl;
+
+    for (int i = 0; i < 200; i++) {
+        given_step(&uni, &matr, false);
+    }
+
+    cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
+
+    cout << matr << endl << endl;
 }
 

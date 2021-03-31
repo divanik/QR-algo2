@@ -9,16 +9,12 @@ namespace QR_algorithm {
 
 template<typename T>
 class Manager {
-    enum SHIFT{
-        NONE, 
-        RAYLEIGH,
-        WILKINSON,
-        IMPLICIT_WILKINSON
-    } shift;
-    enum SYMMETRY {
-        SYMMETRIC,
-        GENERAL
-    } symmetry;
+    symmetry_mode = false;
+    enum {
+        WITH_UNIT,
+        WITHOUT_UNIT,
+        EIGENVALUES_ONLY
+    } calculation_mode;
     size_t max_iterations;
     bool make_each_step_zeros = true;
 };

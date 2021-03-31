@@ -21,14 +21,6 @@ public:
 
 };
 
-double conjugate (double a) {
-    return a;
-}
-
-float conjugate (float a) {
-    return a;
-}
-
 template<typename T>
 std::ostream& operator<< (std::ostream& os, const Given_rotation<T>& gr) {
     os << "giv_rot: [" <<
@@ -54,7 +46,7 @@ Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Given_rotation<
 
 
 template<typename T>
-void left_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+void left_multiply( const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
     }
@@ -65,8 +57,22 @@ void left_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
     return;
 }
 
+template <typename T>
+void left_multiply( const Given_rotation<T>& giv_rot, Eigen::VectorX<T>* vect) {
+    if (vect == nullptr) {
+        return;
+    }
+    const T c1 = (*vect)(giv_rot.fir_ind);
+    const T c2 = (*vect)(giv_rot.sec_ind);
+    (*vect)(giv_rot.fir_ind) = ((conjugate(giv_rot.cos) * c1) + (conjugate(giv_rot.sin) * c2));
+    (*vect)(giv_rot.sec_ind) = ((giv_rot.cos * c2) - (giv_rot.sin * c1));
+    return;
+}
+
+
+
 template<typename T>
-void right_multiply(Eigen::MatrixX<T>* matr, const Given_rotation<T>& giv_rot) {
+void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
     }
