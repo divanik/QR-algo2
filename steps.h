@@ -1,3 +1,5 @@
+#pragma once
+
 #include "given_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
@@ -5,13 +7,23 @@
 namespace QR_algorithm {
 
 template<typename T>
-void given_step(Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center, bool make_each_step_zeros) {
+void sub_diag(T shift, size_t lef, size_t rig, Eigen::MatrixX<T>* center) {
+    auto& center0 = *center;
+    for (int i = lef; i <= rig; i++) {
+        center0(i, i) -= shift;
+    }
+    return;
+}
+
+template<typename T>
+void given_step( bool make_each_step_zeros, size_t lef, size_t rig, 
+                Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     typename std::vector<Given_rotation<T>> rotates;
     size_t sz = center0.rows();
     rotates.reserve(sz - 1);
 
-    for (size_t i = 0; i < sz - 1; i++) {
+    for (size_t i = lef; i <= rig; i++) {
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
@@ -34,23 +46,24 @@ void given_step(Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center, bool make_ea
     }
 }
 
-/*
+
 template<typename T>
-void rayleigh_step (Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center,
-                bool make_each_step_zeros = true, size_t lef = 0, size_t rig = -1) {
+void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+                        Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
-    T shift = center0.(size - 1, size - 1);
-    center0 -= shift * Eigen::MatrixX<T>::Identity(size, size);
-    givens_step(unit, center);
-    center0 += shift * Eigen::MatrixX<T>::Identity(size, size); 
+    T shift = center0(rig, rig);
+    sub_diag(shift, lef, rig, center);
+    given_step<T>(make_each_step_zeros, lef, rig, unit, center);
+    sub_diag(-shift, lef, rig, center);
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
     }   
 }
 
+/*
 template<typename T>
-void simple_wilkinson_step (Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center,
-                bool make_each_step_zeros = true, size_t lef = 0, size_t rig = -1) {
+void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
+                                        Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = Center->rows();
     T prev   = center0(sz - 2, sz - 2);

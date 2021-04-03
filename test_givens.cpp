@@ -2,6 +2,7 @@
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
 #include "steps.h"
+#include "algorithm_iterations.h"
 #include "Eigen/Core"
 
 using namespace Eigen;
@@ -32,9 +33,9 @@ int main() {
 
     cout << matr << endl << endl;
 
-    for (int i = 0; i < 200; i++) {
-        given_step(&uni, &matr, false);
-    }
+    size_t iter;
+    cin >> iter;
+    simple_shift_iterations<double>(10, 1e-9, false, &uni, &matr);
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
 
