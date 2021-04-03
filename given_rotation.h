@@ -16,7 +16,7 @@ public:
     T cos, sin;
 
     Given_rotation adjacent () {
-        return {fir_ind, sec_ind, conjugate(cos), T(-1) * sin};
+        return {fir_ind, sec_ind, conj(cos), T(-1) * sin};
     }
 
 };
@@ -52,7 +52,7 @@ void left_multiply( const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     }
     const Eigen::RowVectorX<T> covec1 = matr->row(giv_rot.fir_ind);
     const Eigen::RowVectorX<T> covec2 = matr->row(giv_rot.sec_ind);
-    matr->row(giv_rot.fir_ind) = ((conjugate(giv_rot.cos) * covec1) + (conjugate(giv_rot.sin) * covec2));
+    matr->row(giv_rot.fir_ind) = ((conj(giv_rot.cos) * covec1) + (conj(giv_rot.sin) * covec2));
     matr->row(giv_rot.sec_ind) = ((giv_rot.cos * covec2) - (giv_rot.sin * covec1));
     return;
 }
@@ -64,7 +64,7 @@ void left_multiply( const Given_rotation<T>& giv_rot, Eigen::VectorX<T>* vect) {
     }
     const T c1 = (*vect)(giv_rot.fir_ind);
     const T c2 = (*vect)(giv_rot.sec_ind);
-    (*vect)(giv_rot.fir_ind) = ((conjugate(giv_rot.cos) * c1) + (conjugate(giv_rot.sin) * c2));
+    (*vect)(giv_rot.fir_ind) = ((conj(giv_rot.cos) * c1) + (conj(giv_rot.sin) * c2));
     (*vect)(giv_rot.sec_ind) = ((giv_rot.cos * c2) - (giv_rot.sin * c1));
     return;
 }
@@ -78,8 +78,8 @@ void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     }
     const Eigen::VectorX<T>  vec1 = matr->col(giv_rot.fir_ind);
     const Eigen::VectorX<T>  vec2 = matr->col(giv_rot.sec_ind);
-    matr->col(giv_rot.fir_ind) = (conjugate(giv_rot.cos) * vec1) - (giv_rot.sin * vec2);
-    matr->col(giv_rot.sec_ind) = (giv_rot.cos * vec2) + (conjugate(giv_rot.sin) * vec1);
+    matr->col(giv_rot.fir_ind) = (conj(giv_rot.cos) * vec1) - (giv_rot.sin * vec2);
+    matr->col(giv_rot.sec_ind) = (giv_rot.cos * vec2) + (conj(giv_rot.sin) * vec1);
     return;
 }
 

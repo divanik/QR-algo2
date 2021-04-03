@@ -23,7 +23,7 @@ void given_step( bool make_each_step_zeros, size_t lef, size_t rig,
     size_t sz = center0.rows();
     rotates.reserve(sz - 1);
 
-    for (size_t i = lef; i <= rig; i++) {
+    for (size_t i = lef; i < rig; i++) {
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
@@ -52,6 +52,7 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     T shift = center0(rig, rig);
+    size_t sz = center0.rows();
     sub_diag(shift, lef, rig, center);
     given_step<T>(make_each_step_zeros, lef, rig, unit, center);
     sub_diag(-shift, lef, rig, center);
@@ -60,27 +61,27 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
     }   
 }
 
-/*
 template<typename T>
-void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
-                                        Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
+void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+                        Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
-    size_t sz = Center->rows();
-    T prev   = center0(sz - 2, sz - 2);
-    T corner = center0(sz - 1, sz - 1);
-    T prod   = center0(sz - 2, sz - 1) * center0(sz - 1, sz - 2);
-    T disc = (prev - corner) * (prev - corner) + 4 * prod;
-    T x1 = (prev + corner + sqrt(disc)) / 2; 
-    T x2 = (prev + corner - sqrt(disc)) / 2;
-    T shift = (abs(x1 - corner) < abs(x2 - corner)) : x1 ? x2; 
-    center0 -= shift * Eigen::MatrixX<T>::Identity(sz, sz);
-    givens_step(Unit, Center);
-    center0 += shift * Eigen::MatrixX<T>::Identity(sz, sz);    
+    size_t sz = center0.rows();
+    T prev   = center0(rig, rig);
+    T corner = center0(rig - 1, rig - 1);
+    T prod   = center0(rig - 1, rig) * center0(rig, rig - 1);
+    T disc = (prev - corner) * (prev - corner) + T(4) * prod;
+    T x1 = (prev + corner + sqrt(disc)) / T(2); 
+    T x2 = (prev + corner - sqrt(disc)) / T(2);
+    T shift = (abs(x1 - corner) < abs(x2 - corner)) ? x1 : x2; 
+    sub_diag(shift, lef, rig, center);
+    given_step(make_each_step_zeros, lef, rig, unit, center);
+    sub_diag(-shift, lef, rig, center); 
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
     }
 }
 
+/*
 //to debug
 template<typename T>
 void double_wilkinson_step (Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center,

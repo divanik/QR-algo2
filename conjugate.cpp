@@ -1,6 +1,6 @@
 namespace QR_algorithm {
 
-double conjugate (double a) {
+double conj (double a) {
     return a;
 }
 
