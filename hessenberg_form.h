@@ -34,7 +34,7 @@ Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& ob
 }
 
 template<typename T>
-std::vector<Given_rotation<T>> find_givens_rotations(Eigen::VectorX<T> vect, size_t bottom) {
+std::vector<Given_rotation<T>> find_given_rotations(Eigen::VectorX<T> vect, size_t bottom) {
     if (bottom == 0) {
         bottom = 1;
     }
@@ -117,7 +117,7 @@ void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eige
 
             Eigen::VectorX<T> current_vec = center0.block(i + 1, i, size - i - 1, 1);
 
-            std::vector<Given_rotation<T>> cur_rots = find_givens_rotations(current_vec, 1);
+            std::vector<Given_rotation<T>> cur_rots = find_given_rotations(current_vec, 1);
 
             //cout << "ok" << endl;
 

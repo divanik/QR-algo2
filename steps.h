@@ -141,7 +141,7 @@ void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
 
 template<typename T>
 void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
-                                        Eigen::MatrixX<T>& unit, Eigen::MatrixX<T>& center) {
+                                        Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;
     size_t size = center0.rows();
@@ -161,7 +161,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
 
     Eigen::VectorX<T> hvec = center0.col(0).head(2);
 
-    std::vector< Given_rotation<T> > p0 = {find_given_rotations(hvec), 1};
+    std::vector< Given_rotation<T> > p0 = find_given_rotations(hvec, 1);
 
     size_t lef_bord = 0;
     size_t rig_bord = min(static_cast<size_t>(2), size); 
@@ -174,18 +174,18 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
 
     for (int i = 0; i < static_cast<int>(size) - 2; i++) {
         size_t block_size = 2;
-        Eigen::VectorX<T> current_vec = center.block(i + 1, i, block_size, 1);
+        Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
-        Householder_reflection<T> p = {find_given_rotations(current_vec), i + 1};
+        std::vector< Given_rotation<T> >  p = find_given_rotations(current_vec, i + 1);
 
         lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
-        lef_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
+        rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
 
-        left_multiply(p0[0], lef_bord, rig_bord, center);
+        left_multiply(p[0], lef_bord, rig_bord, center);
 
-        right_multiply(p0[0], lef_bord, rig_bord, center);
+        right_multiply(p[0], lef_bord, rig_bord, center);
 
-        right_multiply(p0[0], unit);
+        right_multiply(p[0], unit);
     }
 
     if (make_each_step_zeros) {

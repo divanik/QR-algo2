@@ -71,11 +71,11 @@ void shift_iterations(const size_t steps_number, double eps, bool make_each_step
 
 
 template<typename T>
-void symmetric_iterations(const size_t steps_number, double eps, bool make_each_step_zeros, 
+void symmetrical_iterations(const size_t steps_number, double eps, bool make_each_step_zeros, 
                                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
-    Shift_splitter sh_sp;
+    Shift_splitter sh_sp(0, sz - 1);
     for (size_t step = 0; step < steps_number; step++) {
         for (auto& [lef, rig] : sh_sp) {
             symmetrical_step(make_each_step_zeros, lef, rig, unit, center);         

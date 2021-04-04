@@ -21,7 +21,7 @@ int main() {
         for (int j = i + 1; j < size; j++) {
             comp p = (matr(i, j) + matr(j, i)) / static_cast<comp>(2);
             matr(i, j) = p;
-            matr(j, i) = p;
+            matr(j, i) = conj(p);
         }
     }
 
@@ -45,7 +45,7 @@ int main() {
         shift = IMPLICIT_WILKINSON;
     }
 
-    shift_iterations<comp>(iter, 1e-11, false, shift, &uni, &matr);
+    shift_iterations<comp>(iter, 1e-11, false, shift, nullptr, &matr);
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
     double err = 0;
@@ -53,7 +53,7 @@ int main() {
         err += abs(matr(i, i - 1)) * abs(matr(i, i - 1));
     }
     err = sqrt(err);
-    //cout << matr << endl << endl;
+    cout << matr << endl << endl;
 
     cout << err << endl;
 }

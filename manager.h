@@ -16,7 +16,8 @@ class Manager {
         EIGENVALUES_ONLY
     } calculation_mode;
     size_t max_iterations;
-    bool make_each_step_zeros = true;
+    bool make_each_step_zeros = false;
+
 };
 
 

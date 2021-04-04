@@ -86,7 +86,7 @@ void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
 
 template <typename T>
 void left_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig, 
-                                        Eigen::VectorX<T>* matr) {
+                                        Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
     }
