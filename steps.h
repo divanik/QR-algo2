@@ -81,32 +81,37 @@ void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
     }
 }
 
-/*
 //to debug
 template<typename T>
-void double_wilkinson_step (Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center,
-                bool make_each_step_zeros = true, size_t lef = 0, size_t rig = -1) {
+void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+                                Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;
     size_t size = center0.rows();
 
-    if (size <= 2) {
+    if (rig == lef) {
         return;
     }
 
-    T trace = center0(size - 2, size - 2) + center0(size - 1, size - 1);
-    T det = center0(size - 2, size - 2) * center0(size - 1, size - 1) 
-                - center0(size - 2, size - 1) * center0(size - 1, size - 2);
+    T trace = center0(rig, rig) + center0(rig - 1, rig - 1);
+    T det = center0(rig - 1, rig - 1) * center0(rig, rig) 
+                - center0(rig - 1, rig) * center0(rig, rig - 1);
 
-    Eigen::VectorX<T> hvec = center0.col(0).head(3);
+    size_t block_size = min(static_cast<size_t>(3), rig - lef + 1);
+
+    Eigen::VectorX<T> hvec = center0.block(lef, lef, block_size, 1);
     Eigen::VectorX<T> hvec2 = hvec;
-    hvec2(2, 0) = 0;
-    Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(3);
+    if (block_size == 3) {
+        hvec2(2, 0) = 0;
+    }
+    Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(block_size);
 
     e1(0) = 1;
-    Eigen::VectorX<T> to_get = center0.block(0, 0, 3, 3) * hvec - trace * hvec2 + det * e1;
+    Eigen::VectorX<T> to_get = center0.block(lef, lef, block_size, block_size) * hvec - trace * hvec2 + det * e1;
 
-    Householder_reflection<T> p0 = {find_householder_reflector(to_get), 0};
+    Householder_reflection<T> p0 = find_householder_reflector(to_get, 0);
+
+    p0.make_shift(lef);
 
     left_multiply(p0, center);
 
@@ -114,35 +119,39 @@ void double_wilkinson_step (Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center,
 
     right_multiply(p0, unit);
 
-    for (size_t i = 0; i < size - 2; i++) {
-        size_t block_size = min(static_cast<size_t>(3), size - i - 1);
+    for (size_t i = lef; i < rig - 1; i++) {
+        block_size = min(static_cast<size_t>(3), rig - i);
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
-        Householder_reflection<T> p = {find_reflector(current_vec), i + 1};
+        Householder_reflection<T> p = find_householder_reflector(current_vec, 0);
+
+        p.make_shift(i + 1);
+
         left_multiply(p, center);
 
         right_multiply(p, center);
 
-        right_multiply(p, center);
+        right_multiply(p, unit);
     }
+
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
     }
 }
 
 template<typename T>
-void implicit_symmetrical_step (Eigen::MatrixX<T>& unit, Eigen::MatrixX<T>& center, 
-                bool make_each_step_zeros = true, size_t lef = 0, size_t rig = -1) {
+void implicit_symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
+                                        Eigen::MatrixX<T>& unit, Eigen::MatrixX<T>& center) {
 
     auto& center0 = *center;
     size_t size = center0.rows();
 
-    if (size <= 1) {
+    if (lef == rig) {
         return;
     }
 
-    T shift = (center0(size - 2, size - 2) - center0(size - 1, size - 1);
-    T b = center0(size - 1, size - 2);
+    T shift = (center0(rig - 1, rig - 1) - center0(rig, rig);
+    T b = center0(rig - 1, rig - 2);
     if (shift == T(0)) {
         shift -= b;
     } else {
@@ -177,6 +186,6 @@ void implicit_symmetrical_step (Eigen::MatrixX<T>& unit, Eigen::MatrixX<T>& cent
         fill_sym_hessenberg_zeros(Center);
     }
 }
-*/
+
 
 }

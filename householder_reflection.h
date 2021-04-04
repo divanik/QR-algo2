@@ -19,7 +19,11 @@ class Householder_reflection {
 public:
     Eigen::VectorX<T> reflect_vector;
     size_t beg;
-    //size_t size;    The size of matrix, been multiplied by our Householder_reflector. Seeems to be useless.
+    
+    void make_shift(size_t sh) {
+        this->beg += sh;
+    }
+
 };
 
 template<typename T>
@@ -50,6 +54,9 @@ Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Householder_ref
 
 template<typename T>
 void left_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>* matr) {
+    if (matr == nullptr) {
+        return;
+    }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
     Eigen::MatrixX<T> subrows = matr->block(beg, 0, size, matr->cols());
@@ -64,6 +71,9 @@ void left_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>*
 
 template<typename T>
 void right_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>* matr) {
+    if (matr == nullptr) {
+        return;
+    }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
     Eigen::MatrixX<T> subcols = matr->block(0, beg, matr->rows(), size);

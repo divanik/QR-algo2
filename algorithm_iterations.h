@@ -38,7 +38,7 @@ void given_iterations(const size_t steps_number, double eps, bool make_each_step
 }
 
 template<typename T>
-void simple_shift_iterations(const size_t steps_number, double eps, bool make_each_step_zeros, 
+void shift_iterations(const size_t steps_number, double eps, bool make_each_step_zeros, 
                             SHIFT shift, Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
@@ -50,11 +50,17 @@ void simple_shift_iterations(const size_t steps_number, double eps, bool make_ea
     splitters.reserve(sz);
     for (size_t step = 0; step < steps_number; step++) {
         for (auto& [lef, rig] : segs) {
+
+//            cout << lef << " " << rig << endl;
+
             if (shift == RAYLEIGH) {
                 rayleigh_step(make_each_step_zeros, lef, rig, unit, center);
-            } else {
+            } else if (shift == WILKINSON) {
                 simple_wilkinson_step(make_each_step_zeros, lef, rig, unit, center);                
+            } else if (shift == IMPLICIT_WILKINSON) {
+                double_wilkinson_step(make_each_step_zeros, lef, rig, unit, center);
             }
+
             for (int i = lef; i < rig; i++) {
                 if (abs(center0(i + 1, i)) < eps) {
                     splitters.push_back(i);
@@ -86,12 +92,8 @@ void simple_shift_iterations(const size_t steps_number, double eps, bool make_ea
             segs.insert(x);
         }
         to_ins.clear();
-        if (step % 100 == 99) {
-            for (auto& [lef, rig] : segs) {
-                cout << lef << " " << rig << endl;
-            }
-            cout << endl;
-        }
+
+        cout << *center << endl;
     }
 }
 
