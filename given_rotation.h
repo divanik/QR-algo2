@@ -83,4 +83,43 @@ void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     return;
 }
 
+
+template <typename T>
+void left_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig, 
+                                        Eigen::VectorX<T>* matr) {
+    if (matr == nullptr) {
+        return;
+    }
+    auto& matr0 = *matr;
+    size_t fi = giv_rot.fir_ind;
+    size_t se = giv_rot.sec_ind;
+    for (int i = lef; i <= rig; i++) {
+        T c1 = ((conj(giv_rot.cos) * matr0(fi, i)) + (conj(giv_rot.sin) * matr0(se, i)));
+        T c2 = ((giv_rot.cos * matr0(se, i)) - (giv_rot.sin * matr0(fi, i)));
+        matr0(fi, i) = c1;
+        matr0(se, i) = c2;
+    }
+    return;
+}
+
+
+
+template<typename T>
+void right_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig, 
+                                        Eigen::MatrixX<T>* matr) {
+    if (matr == nullptr) {
+        return;
+    }
+    auto& matr0 = *matr;
+    size_t fi = giv_rot.fir_ind;
+    size_t se = giv_rot.sec_ind;
+    for (int i = lef; i <= rig; i++) {
+        T c1 = ((conj(giv_rot.cos) * matr0(i, fi)) - (giv_rot.sin * matr0(i, se)));
+        T c2 = ((giv_rot.cos * matr0(i, se)) + (conj(giv_rot.sin) * matr0(i, fi)));
+        matr0(i, fi) = c1;
+        matr0(i, se) = c2;
+    }
+    return;
+}
+
 }

@@ -140,7 +140,7 @@ void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
 }
 
 template<typename T>
-void implicit_symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
+void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
                                         Eigen::MatrixX<T>& unit, Eigen::MatrixX<T>& center) {
 
     auto& center0 = *center;
@@ -150,7 +150,7 @@ void implicit_symmetrical_step (bool make_each_step_zeros, size_t lef, size_t ri
         return;
     }
 
-    T shift = (center0(rig - 1, rig - 1) - center0(rig, rig);
+    T shift = center0(rig - 1, rig - 1) - center0(rig, rig);
     T b = center0(rig - 1, rig - 2);
     if (shift == T(0)) {
         shift -= b;
@@ -161,29 +161,35 @@ void implicit_symmetrical_step (bool make_each_step_zeros, size_t lef, size_t ri
 
     Eigen::VectorX<T> hvec = center0.col(0).head(2);
 
-    std::vector< Given_rotation<T> > p0 = {find_given_rotations(to_get), 1};
+    std::vector< Given_rotation<T> > p0 = {find_given_rotations(hvec), 1};
 
-    left_multiply(p0[0], center);
+    size_t lef_bord = 0;
+    size_t rig_bord = min(static_cast<size_t>(2), size); 
 
-    right_multiply(p0[0], center);
+    left_multiply(p0[0], lef_bord, rig_bord, center);
+
+    right_multiply(p0[0], lef_bord, rig_bord, center);
 
     right_multiply(p0[0], unit);
 
-    for (size_t i = 0; i < size - 2; i++) {
+    for (int i = 0; i < static_cast<int>(size) - 2; i++) {
         size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center.block(i + 1, i, block_size, 1);
 
         Householder_reflection<T> p = {find_given_rotations(current_vec), i + 1};
 
-        left_multiply(p0[0], center);
+        lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
+        lef_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
 
-        right_multiply(p0[0], center);
+        left_multiply(p0[0], lef_bord, rig_bord, center);
+
+        right_multiply(p0[0], lef_bord, rig_bord, center);
 
         right_multiply(p0[0], unit);
     }
 
     if (make_each_step_zeros) {
-        fill_sym_hessenberg_zeros(Center);
+        fill_sym_hessenberg_zeros(center);
     }
 }
 

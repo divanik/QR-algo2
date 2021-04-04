@@ -53,7 +53,7 @@ int main() {
         err += abs(matr(i, i - 1)) * abs(matr(i, i - 1));
     }
     err = sqrt(err);
-    cout << matr << endl << endl;
+    //cout << matr << endl << endl;
 
     cout << err << endl;
 }

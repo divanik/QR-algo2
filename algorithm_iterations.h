@@ -3,6 +3,7 @@
 #include "given_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
+#include "shift_splitter.h"
 #include "steps.h"
 
 #include <set>
@@ -42,16 +43,9 @@ void shift_iterations(const size_t steps_number, double eps, bool make_each_step
                             SHIFT shift, Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
-    std::set<pair<int, int>> segs;
-    std::set<pair<int, int>> to_ins;
-    std::set<pair<int, int>> to_del;
-    segs.insert({0, sz - 1});
-    std::vector<int> splitters;
-    splitters.reserve(sz);
+    Shift_splitter sh_sp(0, sz - 1);
     for (size_t step = 0; step < steps_number; step++) {
-        for (auto& [lef, rig] : segs) {
-
-//            cout << lef << " " << rig << endl;
+        for (auto& [lef, rig] : sh_sp) {
 
             if (shift == RAYLEIGH) {
                 rayleigh_step(make_each_step_zeros, lef, rig, unit, center);
@@ -63,60 +57,37 @@ void shift_iterations(const size_t steps_number, double eps, bool make_each_step
 
             for (int i = lef; i < rig; i++) {
                 if (abs(center0(i + 1, i)) < eps) {
-                    splitters.push_back(i);
+                    sh_sp.fill_splitter(i);
                 }
             }
-            int cur_lef = 0;
-            if (splitters.size()) {
-                to_del.insert({lef, rig});
-                int cur_lef = lef;
-                for (auto& x : splitters) {
-                    if (cur_lef != x) {
-                        to_ins.insert({cur_lef, x});
-                    }
-                    cur_lef = x + 1;
-                }
-                if (cur_lef != rig) {
-                    to_ins.insert({cur_lef, rig});
-                }
-                splitters.clear();
-            }
+            sh_sp.split_segs(lef, rig);
         }
-        for (auto& x : to_del) {
-
-            segs.erase(x);
-        }
-        to_del.clear();
-
-        for (auto& x : to_ins) {
-            segs.insert(x);
-        }
-        to_ins.clear();
-
-        cout << *center << endl;
+        sh_sp.flush_buffer();
+        /*for (auto& [lef, rig] : sh_sp) {
+            cout << lef << " " << rig << endl;
+        }*/
     }
 }
 
-/*
 
 template<typename T>
-void implicit_iterations(Eigen::MatrixX<T>* Unit, Eigen::MatrixX<T>* Center, const size_t steps_number, T eps,
-                                            bool make_each_step_zeros) {
-    typename Eigen::MatrixX<T> answer = Center;
-    size_t sz = Center.rows();
-    size_t cur = sz;
+void symmetric_iterations(const size_t steps_number, double eps, bool make_each_step_zeros, 
+                                Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
+    auto& center0 = *center;
+    size_t sz = center0.rows();
+    Shift_splitter sh_sp;
     for (size_t step = 0; step < steps_number; step++) {
-        given_step(Unit, Center, make_each_step_zeros);
-        T err = 0;
-        for (int i = 0; i < sz - 1; i++) {
-            T k =  abs((*Center)(i + 1, i));
-            err += k * k;
+        for (auto& [lef, rig] : sh_sp) {
+            symmetrical_step(make_each_step_zeros, lef, rig, unit, center);         
+            for (int i = lef; i < rig; i++) {
+                if (max(abs(center0(i + 1, i)), abs(center0(i, i + 1)))  < eps) {
+                    sh_sp.fill_splitter(i);
+                }
+            }
+            sh_sp.split_segs(lef, rig);
         }
-        err = sqrt(err);
-        if (err < eps) {
-            return;
-        }
+        sh_sp.flush_buffer();
     }
-}*/
+}
 
 }
