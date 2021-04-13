@@ -1,4 +1,4 @@
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
 #include "steps.h"
@@ -6,7 +6,6 @@
 #include "Eigen/Core"
 
 #include <complex>
-
 using namespace Eigen;
 using namespace QR_algorithm;
 

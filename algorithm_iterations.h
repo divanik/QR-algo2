@@ -1,6 +1,6 @@
 #pragma once
 
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
 #include "shift_splitter.h"
@@ -21,11 +21,11 @@ enum SHIFT{
 
 
 template<typename T>
-void given_iterations(const size_t steps_number, double eps, bool make_each_step_zeros,
+void givens_iterations(const size_t steps_number, double eps, bool make_each_step_zeros,
                             Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     size_t sz = center->rows();
     for (size_t step = 0; step < steps_number; step++) {
-        given_step<T>(make_each_step_zeros, 0, sz - 1, unit, center);
+        givens_step<T>(make_each_step_zeros, 0, sz - 1, unit, center);
         double err = 0;
         for (int i = 0; i < sz - 1; i++) {
             double k =  abs((*center)(i + 1, i));

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
 
@@ -16,10 +16,10 @@ void sub_diag(T shift, size_t lef, size_t rig, Eigen::MatrixX<T>* center) {
 }
 
 template<typename T>
-void given_step( bool make_each_step_zeros, size_t lef, size_t rig, 
+void givens_step( bool make_each_step_zeros, size_t lef, size_t rig, 
                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
-    typename std::vector<Given_rotation<T>> rotates;
+    typename std::vector<givens_rotation<T>> rotates;
     size_t sz = center0.rows();
     rotates.reserve(sz - 1);
 
@@ -27,7 +27,7 @@ void given_step( bool make_each_step_zeros, size_t lef, size_t rig,
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
-        Given_rotation<T> rotate = {
+        givens_rotation<T> rotate = {
             i, i + 1,
             a / len,
             c / len
@@ -54,7 +54,7 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
     T shift = center0(rig, rig);
     size_t sz = center0.rows();
     sub_diag(shift, lef, rig, center);
-    given_step<T>(make_each_step_zeros, lef, rig, unit, center);
+    givens_step<T>(make_each_step_zeros, lef, rig, unit, center);
     sub_diag(-shift, lef, rig, center);
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
@@ -74,7 +74,7 @@ void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
     T x2 = (prev + corner - sqrt(disc)) / T(2);
     T shift = (abs(x1 - corner) < abs(x2 - corner)) ? x1 : x2; 
     sub_diag(shift, lef, rig, center);
-    given_step(make_each_step_zeros, lef, rig, unit, center);
+    givens_step(make_each_step_zeros, lef, rig, unit, center);
     sub_diag(-shift, lef, rig, center); 
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
@@ -161,7 +161,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
 
     Eigen::VectorX<T> hvec = center0.col(0).head(2);
 
-    std::vector< Given_rotation<T> > p0 = find_given_rotations(hvec, 1);
+    std::vector< givens_rotation<T> > p0 = find_givens_rotations(hvec, 1);
 
     size_t lef_bord = 0;
     size_t rig_bord = min(static_cast<size_t>(2), size); 
@@ -176,7 +176,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
         size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
-        std::vector< Given_rotation<T> >  p = find_given_rotations(current_vec, i + 1);
+        std::vector< givens_rotation<T> >  p = find_givens_rotations(current_vec, i + 1);
 
         lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
         rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));

@@ -1,4 +1,4 @@
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include<iostream>      
 #include<Eigen/Core>
 
@@ -28,7 +28,7 @@ int main() {
     for (auto x : kek) {
         cout << x << endl;
     }*/
-    Given_rotation<float> kek = {0, 1, 0.6, -0.8};
+    Givens_rotation<float> kek = {0, 1, 0.6, -0.8};
     //cout << left_multiply(uni, kek) << endl;
 
     //hessenberg_QR<double>(uni, matr, 1000);

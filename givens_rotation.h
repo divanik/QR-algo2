@@ -1,6 +1,6 @@
 #pragma once
 
-#include "conjugate.h"
+#include "extra_math.h"
 
 #include<iostream>
 #include"Eigen/Core"
@@ -9,29 +9,29 @@
 namespace QR_algorithm {
 
 template<typename T>
-class Given_rotation {
+class Givens_rotation {
 
 public:
 
-    Given_rotation(fir_ind_, sec_ind_, T cos_, T sin_) :    
+    Givens_rotation(size_t fir_ind_, size_t sec_ind_, T cos_, T sin_) :    
         fir_ind(fir_ind_), sec_ind(sec_ind_), cos(cos_), sin(sin_) {
-        ;if (fir_ind_ > sec_ind_) {
+        if (fir_ind_ > sec_ind_) {
             ASSERT("Wrong arguments order in givens rotation!");
         }
+    }
+
+    Givens_rotation adjacent () {
+        return {fir_ind, sec_ind, conj(cos), T(-1) * sin};
     }
 
 private:
     size_t fir_ind, sec_ind; //row and column with rotation matrix. fir_ind < sec_ind
     T cos, sin;
 
-    Given_rotation adjacent () {
-        return {fir_ind, sec_ind, conj(cos), T(-1) * sin};
-    }
-
 };
 
 template<typename T>
-std::ostream& operator<< (std::ostream& os, const Given_rotation<T>& gr) {
+std::ostream& operator<< (std::ostream& os, const Givens_rotation<T>& gr) {
     os << "giv_rot: [" <<
         gr.fir_ind << ", " <<
         gr.sec_ind << ", " <<
@@ -42,20 +42,20 @@ std::ostream& operator<< (std::ostream& os, const Given_rotation<T>& gr) {
 }
 
 template<typename T>
-Eigen::MatrixX<T> operator*(const Given_rotation<T>& giv_rot, const Eigen::MatrixX<T>& matr) {
+Eigen::MatrixX<T> operator*(const Givens_rotation<T>& giv_rot, const Eigen::MatrixX<T>& matr) {
     auto answer = matr;
     return (left_multiply(&answer, giv_rot));
 }
 
 template<typename T>
-Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Given_rotation<T>& giv_rot) {
+Eigen::MatrixX<T> operator*(const Eigen::MatrixX<T>& matr, const Givens_rotation<T>& giv_rot) {
     auto answer = matr;
     return (right_multiply(&answer, giv_rot));
 }
 
 
 template<typename T>
-void left_multiply( const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
+void left_multiply( const Givens_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
     }
@@ -67,7 +67,7 @@ void left_multiply( const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
 }
 
 template <typename T>
-void left_multiply( const Given_rotation<T>& giv_rot, Eigen::VectorX<T>* vect) {
+void left_multiply( const Givens_rotation<T>& giv_rot, Eigen::VectorX<T>* vect) {
     if (vect == nullptr) {
         return;
     }
@@ -81,7 +81,7 @@ void left_multiply( const Given_rotation<T>& giv_rot, Eigen::VectorX<T>* vect) {
 
 
 template<typename T>
-void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
+void right_multiply(const Givens_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
     }
@@ -94,7 +94,7 @@ void right_multiply(const Given_rotation<T>& giv_rot, Eigen::MatrixX<T>* matr) {
 
 
 template <typename T>
-void left_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig, 
+void left_multiply(const Givens_rotation<T>& giv_rot, size_t lef, size_t rig, 
                                         Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;
@@ -114,7 +114,7 @@ void left_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig,
 
 
 template<typename T>
-void right_multiply(const Given_rotation<T>& giv_rot, size_t lef, size_t rig, 
+void right_multiply(const Givens_rotation<T>& giv_rot, size_t lef, size_t rig, 
                                         Eigen::MatrixX<T>* matr) {
     if (matr == nullptr) {
         return;

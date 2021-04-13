@@ -1,17 +1,17 @@
 #pragma once
 
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "Eigen/Core"
+
+#include <vector>
+
+namespace QR_algorithm {
 
 enum HESSENBERG_TRANSFORM {
     HOUSEHOLDER_REFLECTION,
     GIVENS_ROTATION
 };
-
-using namespace std;
-
-namespace QR_algorithm {
 
 template<typename T>
 Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& object, 
@@ -34,22 +34,22 @@ Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& ob
 }
 
 template<typename T>
-std::vector<Given_rotation<T>> find_given_rotations(Eigen::VectorX<T> vect, size_t bottom) {
-    if (bottom == 0) {
-        bottom = 1;
+std::vector<Givens_rotation<T>> find_givens_rotations(Eigen::VectorX<T> object, size_t beginning) {
+    if (beginning == 0) {
+        beginning = 1;
     }
-    size_t sz = vect.size();
-    std::vector<Given_rotation<T>> rotates;
+    size_t sz = object.size();
+    std::vector<Givens_rotation<T>> rotates;
     rotates.reserve(sz - 1);
-    size_t p = bottom - 1;
-    for (size_t i = bottom; i < sz; i++) {
+    size_t p = beggining - 1;
+    for (size_t i = beggining; i < sz; i++) {
 
         // cout << i << endl;
-        T a = vect(p);
-        T c = vect(i);
+        T a = object(p);
+        T c = object(i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
         // cout << i << endl;
-        Given_rotation<T> rotate  = {p, i, T(1), T(0)};
+        Givens_rotation<T> rotate  = {p, i, T(1), T(0)};
         if (len != T(0)) {
             rotate = {
                 p, i,
@@ -58,7 +58,7 @@ std::vector<Given_rotation<T>> find_given_rotations(Eigen::VectorX<T> vect, size
             };
         }
         rotates.push_back(rotate);
-        left_multiply(rotate, &vect);
+        left_multiply(rotate, &object);
         // cout << vect << endl;
         // cout << i << endl;
         //std::cout << matr << std::endl;
@@ -117,7 +117,7 @@ void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eige
 
             Eigen::VectorX<T> current_vec = center0.block(i + 1, i, size - i - 1, 1);
 
-            std::vector<Given_rotation<T>> cur_rots = find_given_rotations(current_vec, 1);
+            std::vector<Givens_rotation<T>> cur_rots = find_givens_rotations(current_vec, 1);
 
             //cout << "ok" << endl;
 
@@ -138,6 +138,3 @@ void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eige
 
 
 }
-
-
-/*https://patents.google.com/patent/US8473539*/

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "given_rotation.h"
+#include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
 #include "steps.h"
