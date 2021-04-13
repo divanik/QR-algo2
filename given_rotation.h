@@ -12,6 +12,15 @@ template<typename T>
 class Given_rotation {
 
 public:
+
+    Given_rotation(fir_ind_, sec_ind_, T cos_, T sin_) :    
+        fir_ind(fir_ind_), sec_ind(sec_ind_), cos(cos_), sin(sin_) {
+        ;if (fir_ind_ > sec_ind_) {
+            ASSERT("Wrong arguments order in givens rotation!");
+        }
+    }
+
+private:
     size_t fir_ind, sec_ind; //row and column with rotation matrix. fir_ind < sec_ind
     T cos, sin;
 
