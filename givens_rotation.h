@@ -15,19 +15,50 @@ public:
 
     Givens_rotation(size_t fir_ind_, size_t sec_ind_, T cos_, T sin_) :    
         fir_ind(fir_ind_), sec_ind(sec_ind_), cos(cos_), sin(sin_) {
-        if (fir_ind_ > sec_ind_) {
-            ASSERT("Wrong arguments order in givens rotation!");
-        }
+        /*if (fir_ind_ > sec_ind_) {
+            //ASSERT("Wrong arguments order in givens rotation!");
+        }*/
     }
 
     Givens_rotation adjacent () {
         return {fir_ind, sec_ind, conj(cos), T(-1) * sin};
     }
 
+    void make_shift(size_t p) {
+        fir_ind += p;
+        sec_ind += p;
+    }
+
 private:
     size_t fir_ind, sec_ind; //row and column with rotation matrix. fir_ind < sec_ind
     T cos, sin;
 
+    template<typename U>
+    friend Eigen::MatrixX<U> operator*(const Givens_rotation<U>& giv_rot, const Eigen::MatrixX<U>& matr);
+
+    template<typename U>
+    friend Eigen::MatrixX<U> operator*(const Eigen::MatrixX<U>& matr, const Givens_rotation<U>& giv_rot);
+
+    template<typename U>
+    friend void left_multiply( const Givens_rotation<U>& giv_rot, Eigen::MatrixX<U>* matr);
+
+    template<typename U>
+    friend void left_multiply( const Givens_rotation<U>& giv_rot, Eigen::VectorX<U>* vect);
+
+    template<typename U>
+    friend void right_multiply(const Givens_rotation<U>& giv_rot, Eigen::MatrixX<U>* matr);
+
+    template<typename U>
+    friend void left_multiply(const Givens_rotation<U>& giv_rot, size_t lef, size_t rig, 
+                                        Eigen::MatrixX<U>* matr);
+
+    template<typename U>
+    friend void right_multiply(const Givens_rotation<U>& giv_rot, size_t lef, size_t rig, 
+                                        Eigen::MatrixX<U>* matr);
+
+    template<typename U>
+    friend std::vector<Givens_rotation<T>> find_givens_rotations(Eigen::VectorX<U> object, size_t beginning);
+    
 };
 
 template<typename T>
@@ -129,6 +160,39 @@ void right_multiply(const Givens_rotation<T>& giv_rot, size_t lef, size_t rig,
         matr0(i, se) = c2;
     }
     return;
+}
+
+template<typename T>
+std::vector<Givens_rotation<T>> find_givens_rotations(Eigen::VectorX<T> object, size_t beginning) {
+    if (beginning == 0) {
+        beginning = 1;
+    }
+    size_t sz = object.size();
+    std::vector<Givens_rotation<T>> rotates;
+    rotates.reserve(sz - 1);
+    size_t p = beginning - 1;
+    for (size_t i = beginning; i < sz; i++) {
+
+        // cout << i << endl;
+        T a = object(p);
+        T c = object(i);
+        T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
+        // cout << i << endl;
+        if (len != T(0)) {
+            a = a / len;
+            c = c / len;
+        } else {
+            a = T(1);
+            c = T(0);
+        }
+        Givens_rotation<T> rotate(p, i, a, c);
+        rotates.push_back(rotate);
+        left_multiply(rotate, &object);
+        // cout << vect << endl;
+        // cout << i << endl;
+        //std::cout << matr << std::endl;
+    }
+    return rotates;
 }
 
 }

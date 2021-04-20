@@ -19,7 +19,7 @@ template<typename T>
 void givens_step( bool make_each_step_zeros, size_t lef, size_t rig, 
                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
-    typename std::vector<givens_rotation<T>> rotates;
+    typename std::vector<Givens_rotation<T>> rotates;
     size_t sz = center0.rows();
     rotates.reserve(sz - 1);
 
@@ -27,7 +27,7 @@ void givens_step( bool make_each_step_zeros, size_t lef, size_t rig,
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
-        givens_rotation<T> rotate = {
+        Givens_rotation<T> rotate = {
             i, i + 1,
             a / len,
             c / len
@@ -161,7 +161,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
 
     Eigen::VectorX<T> hvec = center0.col(0).head(2);
 
-    std::vector< givens_rotation<T> > p0 = find_givens_rotations(hvec, 1);
+    std::vector< Givens_rotation<T> > p0 = find_givens_rotations(hvec, 1);
 
     size_t lef_bord = 0;
     size_t rig_bord = min(static_cast<size_t>(2), size); 
@@ -176,7 +176,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
         size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
-        std::vector< givens_rotation<T> >  p = find_givens_rotations(current_vec, i + 1);
+        std::vector< Givens_rotation<T> >  p = find_givens_rotations(current_vec, i + 1);
 
         lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
         rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));

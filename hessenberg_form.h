@@ -14,59 +14,6 @@ enum HESSENBERG_TRANSFORM {
 };
 
 template<typename T>
-Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& object, 
-                            size_t beginning) {
-    Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(object.size());
-    e1(0) = T(1);
-    auto x1 = object(0);
-    T sign;
-    if (abs(x1) == T(0))  {                       // (abs(x1) < eps), but seems to be stable
-        sign = 1;
-    } else {
-        sign = x1 / abs(x1);
-    }
-    Eigen::VectorX<T> num = object - object.norm() * sign * e1;
-    if (num.norm() != T(0)) {                     // (abs(x1) < eps)
-        num /= num.norm();
-    }
-    Householder_reflection<T> cur_refl = {num, beginning};
-    return {num, beginning};
-}
-
-template<typename T>
-std::vector<Givens_rotation<T>> find_givens_rotations(Eigen::VectorX<T> object, size_t beginning) {
-    if (beginning == 0) {
-        beginning = 1;
-    }
-    size_t sz = object.size();
-    std::vector<Givens_rotation<T>> rotates;
-    rotates.reserve(sz - 1);
-    size_t p = beggining - 1;
-    for (size_t i = beggining; i < sz; i++) {
-
-        // cout << i << endl;
-        T a = object(p);
-        T c = object(i);
-        T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
-        // cout << i << endl;
-        Givens_rotation<T> rotate  = {p, i, T(1), T(0)};
-        if (len != T(0)) {
-            rotate = {
-                p, i,
-                a / len,
-                c / len
-            };
-        }
-        rotates.push_back(rotate);
-        left_multiply(rotate, &object);
-        // cout << vect << endl;
-        // cout << i << endl;
-        //std::cout << matr << std::endl;
-    }
-    return rotates;
-}
-
-template<typename T>
 void fill_hessenberg_zeros(Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
@@ -74,7 +21,7 @@ void fill_hessenberg_zeros(Eigen::MatrixX<T>* center) {
         for (size_t j = i + 2; j < sz; j++) {
             center0(i, j) = 0;
         }
-    } 
+     } 
     return;
 }
 
@@ -98,17 +45,12 @@ void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eige
     size_t size = center0.rows();
     if (ht == HOUSEHOLDER_REFLECTION) {
         for (size_t i = 0; i < size - 2; i++) {
-
             Eigen::VectorX<T> current_vec = center0.block(i + 1, i, size - i - 1, 1);
-
-            Householder_reflection cur_refl = find_householder_reflector(current_vec, i + 1);
+            Householder_reflection<T> cur_refl = find_householder_reflector(current_vec, i + 1);
 
             left_multiply(cur_refl, center);
-
             right_multiply(cur_refl, center);
-
             right_multiply(cur_refl, unit); 
-
         }
     } else if (ht == GIVENS_ROTATION) {
         for (size_t i = 0; i < size - 2; i++) {
@@ -122,12 +64,10 @@ void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eige
             //cout << "ok" << endl;
 
             for (auto& x : cur_rots) {
-                x.fir_ind += i + 1;
-                x.sec_ind += i + 1;
+                x.make_shift(i + 1);
+
                 left_multiply(x, center);
-
                 right_multiply(x.adjacent(), center);
-
                 right_multiply(x.adjacent(), unit);
             }
             

@@ -17,12 +17,38 @@ template<typename T>
 class Householder_reflection {
 
 public:
+    Householder_reflection(Eigen::VectorX<T> reflect_vector_, size_t beg_) : 
+        reflect_vector(reflect_vector_), beg(beg_) {
+        T norm = reflect_vector.norm();
+        if (norm != static_cast<T>(0)) {
+            reflect_vector /= norm;
+        }
+    }
+
     Eigen::VectorX<T> reflect_vector;
     size_t beg;
     
     void make_shift(size_t sh) {
         this->beg += sh;
     }
+
+    template<typename U>
+    friend Eigen::MatrixX<U> operator*(const Householder_reflection<T>& hou_refl, const Eigen::MatrixX<U>& matr);
+
+    template<typename U>
+    friend Eigen::MatrixX<U> operator*(const Eigen::MatrixX<U>& matr, const Householder_reflection<U>& hou_refl);
+
+    template<typename U>
+    friend void left_multiply(const Householder_reflection<U>& hou_refl, Eigen::MatrixX<U>* matr);
+
+
+    template<typename U>
+    friend void right_multiply(const Householder_reflection<U>& hou_refl, Eigen::MatrixX<U>* matr);
+
+
+    template<typename U>
+    friend Householder_reflection<U> find_householder_reflector(const Eigen::VectorX<U>& object, 
+                            size_t beginning);
 
 };
 
@@ -84,6 +110,26 @@ void right_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>
         matr->col(beg + i) -= 2 * subcols.col(i);
     }
     return;
+}
+
+template<typename T>
+Householder_reflection<T> find_householder_reflector(const Eigen::VectorX<T>& object, 
+                            size_t beginning) {
+    Eigen::VectorX<T> e1 = Eigen::VectorX<T>::Zero(object.size());
+    e1(0) = T(1);
+    auto x1 = object(0);
+    T sign;
+    if (abs(x1) == T(0))  {                       // (abs(x1) < eps), but seems to be stable
+        sign = 1;
+    } else {
+        sign = x1 / abs(x1);
+    }
+    Eigen::VectorX<T> num = object - object.norm() * sign * e1;
+    if (num.norm() != T(0)) {                     // (abs(x1) < eps)
+        num /= num.norm();
+    }
+    Householder_reflection<T> cur_refl = {num, beginning};
+    return {num, beginning};
 }
 
 }
