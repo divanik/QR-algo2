@@ -14,21 +14,28 @@ using comp = complex<double>;
 int main() {
     int size;
     cin >> size;
-    MatrixX<comp> matr = MatrixX<comp>::Random(size, size);
+    MatrixX<double> matr0 = MatrixX<double>::Random(size, size);
+    MatrixX<double> matr = MatrixX<double>::Zero(size, size);
 
     for (int i = 0; i < size; i++) {
         for (int j = i + 1; j < size; j++) {
-            comp p = (matr(i, j) + matr(j, i)) / static_cast<comp>(2);
-            matr(i, j) = p;
-            matr(j, i) = conj(p);
+            matr0(i, j) = (matr0(i, j) + matr0(j, i)) / 2;
+            matr0(j, i) = matr0(i, j);
+        }
+    }
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            matr(i, j) = matr0(i, j);
         }
     }
 
+    //cout << matr << endl << endl;
+
     auto matr_conserve = matr;
 
-    MatrixX<comp> uni = MatrixX<comp>::Identity(size, size);
+    MatrixX<double> uni = MatrixX<double>::Identity(size, size);
 
-    make_hessenberg_form<comp>(GIVENS_ROTATION, &uni, &matr);
+    make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
 
     size_t iter;
     cin >> iter;
@@ -44,15 +51,16 @@ int main() {
         shift = IMPLICIT_WILKINSON;
     }
 
-    shift_iterations<comp>(iter, 1e-11, false, shift, nullptr, &matr);
+    shift_iterations<double>(iter, 1e-10, false, shift, &uni, &matr);
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
     double err = 0;
     for (int i = 1; i < size; i++) {
         err += abs(matr(i, i - 1)) * abs(matr(i, i - 1));
     }
+    //cout << matr << endl;
     err = sqrt(err);
-    cout << matr << endl << endl;
+    //cout << matr << endl << endl;
 
     cout << err << endl;
 }

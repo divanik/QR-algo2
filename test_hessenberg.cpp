@@ -15,7 +15,7 @@ int main() {
 
     MatrixXd uni = MatrixXd::Identity(size, size);
 
-    make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
+    make_hessenberg_form<double>(HOUSEHOLDER_REFLECTION, &uni, &matr);
 
     double err = 0;
     for (int i = 0; i < size - 2; i++) {

@@ -18,6 +18,10 @@ void sub_diag(T shift, size_t lef, size_t rig, Eigen::MatrixX<T>* center) {
 template<typename T>
 void givens_step( bool make_each_step_zeros, size_t lef, size_t rig, 
                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
+    if (rig == lef) {
+        return;
+    }
+
     auto& center0 = *center;
     typename std::vector<Givens_rotation<T>> rotates;
     size_t sz = center0.rows();
@@ -50,6 +54,10 @@ void givens_step( bool make_each_step_zeros, size_t lef, size_t rig,
 template<typename T>
 void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig, 
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
+    if (rig == lef) {
+        return;
+    }
+
     auto& center0 = *center;
     T shift = center0(rig, rig);
     size_t sz = center0.rows();
@@ -64,10 +72,14 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
 template<typename T>
 void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, 
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
+    if (rig == lef) {
+        return;
+    }
+
     auto& center0 = *center;
     size_t sz = center0.rows();
-    T prev   = center0(rig, rig);
-    T corner = center0(rig - 1, rig - 1);
+    T corner = center0(rig, rig);
+    T prev = center0(rig - 1, rig - 1);
     T prod   = center0(rig - 1, rig) * center0(rig, rig - 1);
     T disc = (prev - corner) * (prev - corner) + T(4) * prod;
     T x1 = (prev + corner + sqrt(disc)) / T(2); 
@@ -87,11 +99,41 @@ void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
                                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;
-    size_t size = center0.rows();
+    //size_t size = center0.rows();
 
     if (rig == lef) {
         return;
     }
+
+    /*if (rig - lef == 1) {
+        T det1 = (center0(rig, rig) - center0(rig - 1, rig - 1)) * (center0(rig, rig) - center0(rig - 1, rig - 1)) + 
+                4 * center0(rig - 1, rig) * center0(rig, rig - 1);
+        if (det1 < T(0)) {
+            return;
+        } 
+        
+        T skew_trace = center0(rig, rig) - center0(rig - 1, rig - 1);
+        T ctg = T(0);
+        if (skew_trace < T(0)) {
+            ctg = (-sqrt(det1) - skew_trace) / (2 * center0(rig, lef));
+        } else {
+            ctg = (sqrt(det1) - skew_trace) / (2 * center0(rig, lef));
+        }
+        //cout << ctg << endl;
+        //cout << ctg/ sqrt(ctg * ctg + 1) << " " <<  T(1) / sqrt(ctg * ctg + T(1)) << endl;
+        //cout << lef << " " << rig << endl;
+        Givens_rotation<T> giv_rot0(lef, rig, ctg/ sqrt(ctg * ctg + 1), T(1) / sqrt(ctg * ctg + T(1)));
+
+        left_multiply(giv_rot0, center);
+
+        right_multiply(giv_rot0.adjacent(), center);
+
+        right_multiply(giv_rot0.adjacent(), unit);
+
+        //cout << endl << *center << endl << endl;
+
+        return;
+    }*/
 
     T trace = center0(rig, rig) + center0(rig - 1, rig - 1);
     T det = center0(rig - 1, rig - 1) * center0(rig, rig) 
