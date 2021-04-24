@@ -98,6 +98,7 @@ void symmetrical_iterations(const size_t steps_number, double eps, bool make_eac
                 }
             }
             sh_sp.split_segs(lef, rig);
+            cout << lef << " " << rig << endl;
         }
         sh_sp.flush_buffer();
     }

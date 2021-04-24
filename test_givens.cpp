@@ -37,10 +37,10 @@ int main() {
 
     make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
 
-    size_t iter;
-    cin >> iter;
+    //size_t iter;
+    //cin >> iter;
     //simple_shift_iterations<comp>(10, 1e-13, false, &uni, &matr);
-    SHIFT shift;
+    /*SHIFT shift;
     int k;
     cin >> k;
     if (k == 1) {
@@ -49,9 +49,16 @@ int main() {
         shift = WILKINSON;
     } else if (k == 3) {
         shift = IMPLICIT_WILKINSON;
-    }
+    }*/
 
-    shift_iterations<double>(iter, 1e-10, false, shift, &uni, &matr);
+    size_t iter;
+    cin >> iter;
+
+
+    cout << matr << endl << endl;    
+    symmetrical_iterations(iter, 1e-5, false, &uni, &matr); 
+
+    cout << matr << endl << endl;
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
     double err = 0;

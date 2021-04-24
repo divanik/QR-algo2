@@ -192,42 +192,44 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
         return;
     }
 
-    T shift = center0(rig - 1, rig - 1) - center0(rig, rig);
-    T b = center0(rig - 1, rig - 2);
-    if (shift == T(0)) {
-        shift -= b;
+    T d = (center0(rig - 1, rig - 1) - center0(rig, rig)) / 2;
+    T b = center0(rig, rig - 1);
+    T shift = center0(rig, rig);
+    if (d == T(0)) {
+        shift = - abs(b);
     } else {
-        T sign = shift / abs(shift);
-        shift -= (b * b) / (shift + sign * sqrt(shift * shift + b * b));
+        T sign = d / abs(d);
+        shift -= (b * b) / (d + sign * sqrt(d * d + b * b));
     }
 
     Eigen::VectorX<T> hvec = center0.col(0).head(2);
 
+    hvec(0) -= shift;
+
     std::vector< Givens_rotation<T> > p0 = find_givens_rotations(hvec, 1);
 
-    size_t lef_bord = 0;
-    size_t rig_bord = min(static_cast<size_t>(2), size); 
+    left_multiply(p0[0], /*lef_bord, rig_bord,*/ center);
 
-    left_multiply(p0[0], lef_bord, rig_bord, center);
+    right_multiply(p0[0].adjacent(), /*lef_bord, rig_bord,*/ center);
 
-    right_multiply(p0[0], lef_bord, rig_bord, center);
+    right_multiply(p0[0].adjacent(), unit);
 
-    right_multiply(p0[0], unit);
+    cout << "ok" << endl;
 
-    for (int i = 0; i < static_cast<int>(size) - 2; i++) {
+    for (int i = lef; i < rig - 1; i++) {
         size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
-        std::vector< Givens_rotation<T> >  p = find_givens_rotations(current_vec, i + 1);
+        std::vector< Givens_rotation<T> >  p = find_givens_rotations(current_vec, 1);
+        p[0].make_shift(i + 1);
+        //lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
+        //rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
 
-        lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
-        rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
+        left_multiply(p[0], /*lef_bord, rig_bord,*/ center);
 
-        left_multiply(p[0], lef_bord, rig_bord, center);
+        right_multiply(p[0].adjacent(), /*lef_bord, rig_bord,*/ center);
 
-        right_multiply(p[0], lef_bord, rig_bord, center);
-
-        right_multiply(p[0], unit);
+        right_multiply(p[0].adjacent(), unit);
     }
 
     if (make_each_step_zeros) {
