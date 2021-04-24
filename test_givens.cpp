@@ -17,12 +17,12 @@ int main() {
     MatrixX<double> matr0 = MatrixX<double>::Random(size, size);
     MatrixX<double> matr = MatrixX<double>::Zero(size, size);
 
-    for (int i = 0; i < size; i++) {
+    /*for (int i = 0; i < size; i++) {
         for (int j = i + 1; j < size; j++) {
             matr0(i, j) = (matr0(i, j) + matr0(j, i)) / 2;
             matr0(j, i) = matr0(i, j);
         }
-    }
+    }*/
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             matr(i, j) = matr0(i, j);
@@ -37,10 +37,9 @@ int main() {
 
     make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
 
-    //size_t iter;
-    //cin >> iter;
-    //simple_shift_iterations<comp>(10, 1e-13, false, &uni, &matr);
-    /*SHIFT shift;
+    size_t iter;
+    cin >> iter;
+    SHIFT shift;
     int k;
     cin >> k;
     if (k == 1) {
@@ -49,17 +48,17 @@ int main() {
         shift = WILKINSON;
     } else if (k == 3) {
         shift = IMPLICIT_WILKINSON;
-    }*/
+    }
 
-    size_t iter;
+    shift_iterations<double>(iter, 1e-5, false, shift, &uni, &matr);
+    /*size_t iter;
     cin >> iter;
 
 
-    cout << matr << endl << endl;    
+    //cout << matr << endl << endl;    
     symmetrical_iterations(iter, 1e-5, false, &uni, &matr); 
 
-    cout << matr << endl << endl;
-
+    //cout << matr.block(1, 1, 14, 14) << endl << endl;*/
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
     double err = 0;
     for (int i = 1; i < size; i++) {

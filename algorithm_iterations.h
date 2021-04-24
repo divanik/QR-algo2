@@ -71,15 +71,17 @@ void shift_iterations(const size_t steps_number, double eps, bool make_each_step
         }
         cout << endl;*/
     }
-   /* for (auto& [lef, rig] : sh_sp) {
-        cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
+    for (auto& [lef, rig] : sh_sp) {
+        /*cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
         cout << center0(rig, lef) << " " << center0(rig, rig) << endl;
-        cout << endl;
+        cout << endl;*/
+
+        cout << lef << " " << rig << endl << endl;
         
-        cout << (center0(lef, lef) - center0(rig, rig)) * (center0(lef, lef) - center0(rig, rig)) + 
-                4 * center0(rig, lef) *  center0(lef, rig) << endl << (center0(lef, lef) + center0(rig, rig)) << endl;
+        /*cout << (center0(lef, lef) - center0(rig, rig)) * (center0(lef, lef) - center0(rig, rig)) + 
+                4 * center0(rig, lef) *  center0(lef, rig) << endl << (center0(lef, lef) + center0(rig, rig)) << endl;*/
     }
-    cout << endl;*/
+    cout << endl;
 }
 
 
