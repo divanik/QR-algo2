@@ -6,6 +6,12 @@
 
 namespace QR_algorithm {
 
+enum CALCULATION_MODE {
+    WITH_UNIT,
+    WITHOUT_UNIT,
+    EIGENVALUES_ONLY
+};
+
 template<typename T>
 void sub_diag(T shift, size_t lef, size_t rig, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
@@ -16,7 +22,7 @@ void sub_diag(T shift, size_t lef, size_t rig, Eigen::MatrixX<T>* center) {
 }
 
 template<typename T>
-void givens_step( bool make_each_step_zeros, size_t lef, size_t rig, 
+void givens_step(bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     if (rig == lef) {
         return;
@@ -36,13 +42,15 @@ void givens_step( bool make_each_step_zeros, size_t lef, size_t rig,
             a / len,
             c / len
         };
-        left_multiply(rotate, center);
+        if (cm == EIGENVALUES_ONLY) {
+            left_multiply(rotate, lef, rig, center);
+        }
         rotates.push_back(rotate.adjacent());
         //std::cout << matr << std::endl;
     }
 
     for (auto x : rotates) {
-        right_multiply(x, center);
+        right_multiply(x, lef, rig, center);
         right_multiply(x, unit);
     }
     if (make_each_step_zeros) {
@@ -52,7 +60,7 @@ void givens_step( bool make_each_step_zeros, size_t lef, size_t rig,
 
 
 template<typename T>
-void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     if (rig == lef) {
         return;
@@ -62,7 +70,7 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
     T shift = center0(rig, rig);
     size_t sz = center0.rows();
     sub_diag(shift, lef, rig, center);
-    givens_step<T>(make_each_step_zeros, lef, rig, unit, center);
+    givens_step<T>(make_each_step_zeros, lef, rig, cm, unit, center);
     sub_diag(-shift, lef, rig, center);
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
@@ -70,7 +78,7 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig,
 }
 
 template<typename T>
-void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     if (rig == lef) {
         return;
@@ -86,7 +94,7 @@ void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
     T x2 = (prev + corner - sqrt(disc)) / T(2);
     T shift = (abs(x1 - corner) < abs(x2 - corner)) ? x1 : x2; 
     sub_diag(shift, lef, rig, center);
-    givens_step(make_each_step_zeros, lef, rig, unit, center);
+    givens_step(make_each_step_zeros, lef, rig, cm, unit, center);
     sub_diag(-shift, lef, rig, center); 
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
@@ -181,7 +189,7 @@ void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig,
 }
 
 template<typename T>
-void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
+void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;
@@ -205,8 +213,11 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
     Givens_rotation<T> p0 = find_givens_rotations(hvec, 1)[0];
     p0.make_shift(lef);
 
-    left_multiply(p0, /*lef_bord, rig_bord,*/ center);
-    right_multiply(p0.adjacent(), /*lef_bord, rig_bord,*/ center);
+    if (cm == EIGENVALUES_ONLY) {
+        left_multiply(p0, lef, rig, /*lef_bord, rig_bord,*/ center);
+        right_multiply(p0.adjacent(), lef, rig, /*lef_bord, rig_bord,*/ center);
+    } 
+
     right_multiply(p0.adjacent(), unit);
 
     for (int i = lef; i < rig - 1; i++) {
@@ -217,10 +228,10 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig,
         p.make_shift(i + 1);
         //lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
         //rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
-
-        left_multiply(p, /*lef_bord, rig_bord,*/ center);
-
-        right_multiply(p.adjacent(), /*lef_bord, rig_bord,*/ center);
+        if (cm == EIGENVALUES_ONLY) {
+            left_multiply(p, lef, rig, /*lef_bord, rig_bord,*/ center);
+            right_multiply(p.adjacent(), lef, rig, /*lef_bord, rig_bord,*/ center);
+        } 
 
         right_multiply(p.adjacent(), unit);
     }

@@ -50,15 +50,10 @@ int main() {
         shift = IMPLICIT_WILKINSON;
     }
 
-    shift_iterations<double>(iter, 1e-5, false, shift, &uni, &matr);
-    /*size_t iter;
-    cin >> iter;
+    CALCULATION_MODE cm = WITH_UNIT;
 
+    shift_iterations<double>(iter, 1e-5, false, cm, shift, false, &uni, &matr);
 
-    //cout << matr << endl << endl;    
-    symmetrical_iterations(iter, 1e-5, false, &uni, &matr); 
-
-    //cout << matr.block(1, 1, 14, 14) << endl << endl;*/
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
     double err = 0;
     for (int i = 1; i < size; i++) {
