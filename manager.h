@@ -1,9 +1,14 @@
 #pragma once
 
+
+#include "algorithm_iterations.h"
 #include "givens_rotation.h"
 #include "householder_reflection.h"
 #include "hessenberg_form.h"
+#include "qr_decomposition.h"
 #include "steps.h"
+
+#include <string>
 
 namespace QR_algorithm {
 
@@ -29,7 +34,19 @@ public:
         }
     }
 
-    bool set_maximum_iterations(size_t max_iterations_) {
+    bool change_hessenberg_transform(string& transform) {
+        if (transform == "householder") {
+            hessenberg_transform = HOUSEHOLDER_REFLECTION;
+            return true;
+        } else if (transform == "givens") {
+            hessenberg_transform = GIVENS_ROTATION;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void set_maximum_iterations(size_t max_iterations_) {
         max_iterations = max_iterations_;
         max_iterations_set = true;
         return true;
@@ -48,22 +65,35 @@ public:
         accurance = accurance_;
     }
 
+    void set_pseudo_shur_mode (bool pseudo_shur_) {
+        pseudo_shur = pseudo_shur_;
+    }
+
+
+
     void shur_decomposition(const Eigen::MatrixX<T>& matr, Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit);
 
+    void shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit);
+
+    void qr_decomposition(const Eigen::MatrixX<T>& matr, Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit);
+
+    void qr_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit);
+
 private:
-    symmetry_mode = false;
-    calculation_mode = WITH_UNIT;
-    shift_mode = NONE;
+    bool symmetry_mode = false;
+    CALCULATION_MODE calculation_mode = WITH_UNIT;
+    SHIFT shift_mode = NONE;
     double accurance = 1e-4;
     bool max_iterations_set = false;
     size_t max_iterations;
     bool make_each_step_zeros = false;
-    HESSENBERG_TRANSFORM ht = HOUSEHOLDER_REFLECTION;
+    HESSENBERG_TRANSFORM hessenberg_transform = HOUSEHOLDER_REFLECTION;
+    QR_TRANSFORM qr_transform = HOUSEHOLDER_REFLECTION;
     bool pseudo_shur = false;
 };
 
 template<typename T>
-void Manager<T>::shur_decomposition(const Eigen::MatrixX<T>& matr, Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit) {
+void Manager<T>::shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit) {
     size_t check = matr.rows();
     assert(check == matr.cols());
     assert(check == center->rows());
@@ -75,10 +105,10 @@ void Manager<T>::shur_decomposition(const Eigen::MatrixX<T>& matr, Eigen::Matrix
 
     *center = matr;
     if (cm != WITH_UNIT) {
-        make_hessenberg_form(ht, nullptr, &matr1);
+        make_hessenberg_form(hessenberg_transform, nullptr, &matr1);
     } else {
         size_t size = matr.rows();
-        make_hessenberg_form(ht, unit, center);
+        make_hessenberg_form(hessenberg_transform, unit, center);
     }
     if (symmetry_mode) {
         if (cm != WITH_UNIT) {
@@ -97,6 +127,13 @@ void Manager<T>::shur_decomposition(const Eigen::MatrixX<T>& matr, Eigen::Matrix
                         shift, pseudo_shur, nullptr, center);         
         }
     }
+}
+
+template<typename T>
+void Manager<T>::qr_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit) {
+    (*center) = matr;
+    find_full_qr_decomposition(qr_transform, unit, center);
+    return;
 }
 
 }
