@@ -52,9 +52,11 @@ int main() {
 
     CALCULATION_MODE cm = WITH_UNIT;
 
-    shift_iterations<double>(iter, 1e-5, false, cm, shift, false, &uni, &matr);
+    shift_iterations<double>(iter, 1e-5, false, cm, shift, true, &uni, &matr);
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
+
+    cout << matr << endl << endl;
     double err = 0;
     for (int i = 1; i < size; i++) {
         err += abs(matr(i, i - 1)) * abs(matr(i, i - 1));

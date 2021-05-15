@@ -16,6 +16,10 @@ using namespace std;
 template<typename T>
 class Householder_reflection {
 
+private:
+    Eigen::VectorX<T> reflect_vector;
+    size_t beg;
+
 public:
     Householder_reflection(Eigen::VectorX<T> reflect_vector_, size_t beg_) : 
         reflect_vector(reflect_vector_), beg(beg_) {
@@ -24,12 +28,15 @@ public:
             reflect_vector /= norm;
         }
     }
-
-    Eigen::VectorX<T> reflect_vector;
-    size_t beg;
     
-    void make_shift(size_t sh) {
-        this->beg += sh;
+    void make_shift(int sh) {
+        int begin = (int) beg;
+        begin += (int)sh;
+        if (begin < 0) {
+            this->beg = 0;
+        } else {
+            this->beg = begin;
+        }
     }
 
     template<typename U>
@@ -85,6 +92,7 @@ void left_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>*
     }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
+    assert(beg + size <= matr.rows());
     Eigen::MatrixX<T> subrows = matr->block(beg, 0, size, matr->cols());
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subrows = u.adjoint() * subrows;
@@ -102,6 +110,7 @@ void right_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>
     }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
+    assert(beg + size <= matr.cols());
     Eigen::MatrixX<T> subcols = matr->block(0, beg, matr->rows(), size);
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subcols = subcols * u;

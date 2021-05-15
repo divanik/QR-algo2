@@ -94,32 +94,30 @@ private:
 
 template<typename T>
 void Manager<T>::shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit) {
-    size_t check = matr.rows();
-    assert(check == matr.cols());
-    assert(check == center->rows());
+    size_t check = center->rows();
+    assert(check != 0);
     assert(check == center->cols());
-    if (cm != WITH_UNIT) {
+
+    if (calculation_mode == WITH_UNIT) {
         assert(check == unit->rows());
         assert(check == unit->cols());
     }
 
-    *center = matr;
     if (cm != WITH_UNIT) {
-        make_hessenberg_form(hessenberg_transform, nullptr, &matr1);
+        make_hessenberg_form(hessenberg_transform, nullptr, center);
     } else {
-        size_t size = matr.rows();
         make_hessenberg_form(hessenberg_transform, unit, center);
     }
     if (symmetry_mode) {
-        if (cm != WITH_UNIT) {
-            symmetrical_iterations(max_iterations, accurance, make_each_step_zeros, cm,
+        if (calculation_mode != WITH_UNIT) {
+            symmetrical_iterations(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                                 unit, center);
         } else {
-            symmetrical_iterations(max_iterations, accurance, make_each_step_zeros, cm,
+            symmetrical_iterations(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                                 nullptr, center);
         }
     } else {
-        if (cm != WITH_UNIT) {
+        if (calculation_mode != WITH_UNIT) {
             shift_iterations(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                         shift, pseudo_shur, unit, center);
         } else {

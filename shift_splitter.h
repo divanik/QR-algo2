@@ -14,7 +14,7 @@ public:
     using Iterator = std::set<std::pair<int, int>>::iterator;
     using Const_iterator = std::set<std::pair<int, int>>::const_iterator;
 
-    Shift_splitter(size_t lef_, size_t rig_);
+    Shift_splitter(size_t lef_, size_t rig_, Eigen::MatrixX<T>* matr_);
 
     void fill_splitter(int ind);
 
@@ -35,11 +35,11 @@ private:
     std::set<std::pair<int, int>> segs;
     std::set<std::pair<int, int>> to_ins;
     std::set<std::pair<int, int>> to_del;
-    MatrixX<T>* matr;
+    Eigen::MatrixX<T>* matr;
 };
 
 template<typename T>
-Shift_splitter<T>::Shift_splitter(size_t lef_, size_t rig_) {
+Shift_splitter<T>::Shift_splitter(size_t lef_, size_t rig_, Eigen::MatrixX<T>* matr_) : matr(matr_){
     segs.insert({lef_, rig_});
 }
 template<typename T>
@@ -66,7 +66,10 @@ void Shift_splitter<T>::split_segs(size_t lef, size_t rig) {
 }
 
 template <typename T>
-void Shift_splitter<T>::flush_buffer(bool pseudo_shur = false) {
+void Shift_splitter<T>::flush_buffer(bool pseudo_shur) {
+
+    auto& matr0 = *matr;
+
     for (auto& x : to_del) {
         segs.erase(x);
     }
@@ -75,36 +78,41 @@ void Shift_splitter<T>::flush_buffer(bool pseudo_shur = false) {
     for (auto& x : to_ins) {
         if (pseudo_shur) {
             if (x.second == x.first + 1) {
-                T screw_trace = matr(x.first, x.first) - matr(x.second, x.second);
-                T det = screw_trace * screw_trace + 4 * matr(x.first, x.second) * matr(x.second, x.first);
-                if (det >= T(0)) {
-                    return det;
+                T screw_trace = matr0(x.first, x.first) - matr0(x.second, x.second);
+                T det = screw_trace * screw_trace + 4 * matr0(x.first, x.second) * matr0(x.second, x.first);
+                //cout << "det " << det << endl << endl;
+                if (has_root_with_discriminant(det)) {
+                    segs.insert(x);
                 }
             } else {
                 segs.insert(x);
             }
+        } else {
+            segs.insert(x);
         }
     }
     to_ins.clear();
 }
 
 template <typename T>
-Shift_splitter<T>::Iterator Shift_splitter<T>::begin() {
+typename Shift_splitter<T>::Iterator Shift_splitter<T>::begin() {
     return segs.begin();
 }
 
 template <typename T>
-Shift_splitter<T>::Iterator Shift_splitter<T>::end() {
+typename Shift_splitter<T>::Iterator Shift_splitter<T>::end() {
     return segs.end();
 }
 
 template <typename T>
-Shift_splitter<T>::Const_iterator Shift_splitter<T>::begin() const {
+
+typename Shift_splitter<T>::Const_iterator Shift_splitter<T>::begin() const {
     return segs.begin();
 }
 
 template <typename T>
-Shift_splitter<T>::Const_iterator Shift_splitter<T>::end() const{
+
+typename Shift_splitter<T>::Const_iterator Shift_splitter<T>::end() const{
     return segs.end();
 }
 

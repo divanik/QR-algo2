@@ -14,14 +14,20 @@ class Givens_rotation {
 public:
 
     Givens_rotation(size_t fir_ind_, size_t sec_ind_, T cos_, T sin_) :    
-        fir_ind(fir_ind_), sec_ind(sec_ind_), cos(cos_), sin(sin_) {
-        /*if (fir_ind_ > sec_ind_) {
-            //ASSERT("Wrong arguments order in givens rotation!");
-        }*/
+        cos(cos_), sin(sin_) {
+
+            fir_ind_ = min(fir_ind_, sec_ind_);
+            sec_ind_ = max(fir_ind_, sec_ind_);
+            
+            T norm = sqrt(cos * conj(cos) + sin * conj(sin));
+            if (norm != T(0)) {
+                cos_ /= norm; 
+                sin_ /= norm; 
+            }
     }
 
     Givens_rotation adjacent () {
-        return {fir_ind, sec_ind, conj(cos), T(-1) * sin};
+        return {fir_ind, sec_ind, conj(cos), T(-1) * sin};        
     }
 
     void make_shift(size_t p) {

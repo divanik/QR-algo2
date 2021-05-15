@@ -42,16 +42,15 @@ void givens_step(bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_
             a / len,
             c / len
         };
-        if (cm == EIGENVALUES_ONLY) {
-            left_multiply(rotate, lef, rig, center);
-        }
+        left_multiply(rotate, lef, rig, center);
         rotates.push_back(rotate.adjacent());
-        //std::cout << matr << std::endl;
     }
 
     for (auto x : rotates) {
         right_multiply(x, lef, rig, center);
-        right_multiply(x, unit);
+        if (cm == WITH_UNIT) {
+            right_multiply(x, unit);
+        }
     }
     if (make_each_step_zeros) {
         fill_hessenberg_zeros(center);
@@ -103,7 +102,7 @@ void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, C
 
 //to debug
 template<typename T>
-void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, 
+void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;

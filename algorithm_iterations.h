@@ -65,13 +65,13 @@ void shift_iterations(const uint64_t steps_number, double eps, bool make_each_st
             sh_sp.split_segs(lef, rig);
         }
         sh_sp.flush_buffer(pseudo_shur);
-        /*for (auto& [lef, rig] : sh_sp) {
+        for (auto& [lef, rig] : sh_sp) {
             cout << lef << " " << rig << endl << endl;
             cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
             cout << center0(rig, lef) << " " << center0(rig, rig) << endl;
             cout << endl;
         }
-        cout << endl;*/
+        cout << endl;
     }
     for (auto& [lef, rig] : sh_sp) {
         /*cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
