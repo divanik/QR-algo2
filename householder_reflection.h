@@ -92,7 +92,7 @@ void left_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>*
     }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
-    assert(beg + size <= matr.rows());
+    assert(beg + size <= matr->rows());
     Eigen::MatrixX<T> subrows = matr->block(beg, 0, size, matr->cols());
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subrows = u.adjoint() * subrows;
@@ -110,7 +110,7 @@ void right_multiply(const Householder_reflection<T>& hou_refl, Eigen::MatrixX<T>
     }
     auto beg = hou_refl.beg;
     auto size = hou_refl.reflect_vector.size();
-    assert(beg + size <= matr.cols());
+    assert(beg + size <= matr->cols());
     Eigen::MatrixX<T> subcols = matr->block(0, beg, matr->rows(), size);
     const Eigen::VectorX<T>& u = hou_refl.reflect_vector;
     subcols = subcols * u;

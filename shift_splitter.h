@@ -79,7 +79,7 @@ void Shift_splitter<T>::flush_buffer(bool pseudo_shur) {
         if (pseudo_shur) {
             if (x.second == x.first + 1) {
                 T screw_trace = matr0(x.first, x.first) - matr0(x.second, x.second);
-                T det = screw_trace * screw_trace + 4 * matr0(x.first, x.second) * matr0(x.second, x.first);
+                T det = screw_trace * screw_trace + T(4) * matr0(x.first, x.second) * matr0(x.second, x.first);
                 //cout << "det " << det << endl << endl;
                 if (has_root_with_discriminant(det)) {
                     segs.insert(x);
@@ -105,13 +105,11 @@ typename Shift_splitter<T>::Iterator Shift_splitter<T>::end() {
 }
 
 template <typename T>
-
 typename Shift_splitter<T>::Const_iterator Shift_splitter<T>::begin() const {
     return segs.begin();
 }
 
 template <typename T>
-
 typename Shift_splitter<T>::Const_iterator Shift_splitter<T>::end() const{
     return segs.end();
 }

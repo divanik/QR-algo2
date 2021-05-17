@@ -12,8 +12,8 @@
 namespace QR_algorithm {
 
 enum QR_TRANSFORM {
-    HOUSEHOLDER_REFLECTION,
-    GIVENS_ROTATION
+    QR_HOUSEHOLDER_REFLECTION,
+    QR_GIVENS_ROTATION
 };
 
 template<typename T>
@@ -21,7 +21,7 @@ void find_full_qr_decomposition(QR_TRANSFORM qr_tr, Eigen::MatrixX<T>* unit, Eig
     Eigen::MatrixX<T>& center0 = *center;
     size_t rows = center0.rows();
     size_t cols = center0.cols();
-    if (qr_tr == HOUSEHOLDER_REFLECTION) {
+    if (qr_tr == QR_HOUSEHOLDER_REFLECTION) {
         for (size_t i = 0; i < min(rows, cols); i++) {
             Eigen::VectorX<T> current_vec = center0.block(i, i, rows - i, 1);
             Householder_reflection<T> cur_refl = find_householder_reflector(current_vec, 0);
@@ -29,7 +29,7 @@ void find_full_qr_decomposition(QR_TRANSFORM qr_tr, Eigen::MatrixX<T>* unit, Eig
             left_multiply(cur_refl, center);
             right_multiply(cur_refl, unit); 
         }
-    } else if (qr_tr == GIVENS_ROTATION) {
+    } else if (qr_tr == QR_GIVENS_ROTATION) {
         for (size_t i = 0; i < min(rows, cols); i++) {
 
             Eigen::VectorX<T> current_vec = center0.block(i, i, rows - i, 1);

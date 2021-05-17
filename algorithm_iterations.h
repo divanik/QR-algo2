@@ -16,7 +16,7 @@ enum SHIFT{
     NONE, 
     RAYLEIGH,
     WILKINSON,
-    IMPLICIT_WILKINSON
+    FRANCIS
 };
 
 
@@ -39,21 +39,22 @@ void givens_iterations(const size_t steps_number, double eps, bool make_each_ste
 }
 
 template<typename T>
-void shift_iterations(const uint64_t steps_number, double eps, bool make_each_step_zeros, CALCULATION_MODE cm,
+void shift_iterations(size_t steps_number, double eps, bool make_each_step_zeros, CALCULATION_MODE cm,
                             SHIFT shift, bool pseudo_shur, Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
     Shift_splitter<T> sh_sp(0, sz - 1, center);
-    for (uint64_t step = 0; step < steps_number; step++) {
+    for (size_t step = 0; step < steps_number; step++) {
+        cout << step << endl;
         for (auto& [lef, rig] : sh_sp) {
             if (shift == NONE) {
                 givens_step(make_each_step_zeros, lef, rig, cm, unit, center);
             } else if (shift == RAYLEIGH) {
                 rayleigh_step(make_each_step_zeros, lef, rig, cm, unit, center);
             } else if (shift == WILKINSON) {
-                simple_wilkinson_step(make_each_step_zeros, lef, rig, cm, unit, center);                
-            } else if (shift == IMPLICIT_WILKINSON) {
-                double_wilkinson_step(make_each_step_zeros, lef, rig, cm, unit, center);
+                wilkinson_step(make_each_step_zeros, lef, rig, cm, unit, center);                
+            } else if (shift == FRANCIS) {
+                francis_step(make_each_step_zeros, lef, rig, cm, unit, center);
             }
 
             for (int i = lef; i < rig; i++) {
@@ -92,7 +93,7 @@ void symmetrical_iterations(const size_t steps_number, double eps, bool make_eac
                                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     auto& center0 = *center;
     size_t sz = center0.rows();
-    Shift_splitter sh_sp(0, sz - 1);
+    Shift_splitter<T> sh_sp(0, sz - 1, center);
     for (size_t step = 0; step < steps_number; step++) {
         for (auto& [lef, rig] : sh_sp) {
             symmetrical_step(make_each_step_zeros, lef, rig, cm, unit, center);         
@@ -104,7 +105,7 @@ void symmetrical_iterations(const size_t steps_number, double eps, bool make_eac
             sh_sp.split_segs(lef, rig);
             //cout << lef << " " << rig << endl;
         }
-        sh_sp.flush_buffer();
+        sh_sp.flush_buffer(false);
     }
 }
 

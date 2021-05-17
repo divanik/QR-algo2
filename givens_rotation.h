@@ -16,8 +16,8 @@ public:
     Givens_rotation(size_t fir_ind_, size_t sec_ind_, T cos_, T sin_) :    
         cos(cos_), sin(sin_) {
 
-            fir_ind_ = min(fir_ind_, sec_ind_);
-            sec_ind_ = max(fir_ind_, sec_ind_);
+            fir_ind = std::min(fir_ind_, sec_ind_);
+            sec_ind = std::max(fir_ind_, sec_ind_);
             
             T norm = sqrt(cos * conj(cos) + sin * conj(sin));
             if (norm != T(0)) {

@@ -9,13 +9,13 @@
 using namespace Eigen;
 using namespace QR_algorithm;
 
-using comp = complex<double>;
+using type = complex<double>;
 
 int main() {
     int size;
     cin >> size;
-    MatrixX<double> matr0 = MatrixX<double>::Random(size, size);
-    MatrixX<double> matr = MatrixX<double>::Zero(size, size);
+    MatrixX<type> matr0 = MatrixX<type>::Random(size, size);
+    MatrixX<type> matr = MatrixX<type>::Zero(size, size);
 
     /*for (int i = 0; i < size; i++) {
         for (int j = i + 1; j < size; j++) {
@@ -33,9 +33,9 @@ int main() {
 
     auto matr_conserve = matr;
 
-    MatrixX<double> uni = MatrixX<double>::Identity(size, size);
+    MatrixX<type> uni = MatrixX<type>::Identity(size, size);
 
-    make_hessenberg_form<double>(GIVENS_ROTATION, &uni, &matr);
+    make_hessenberg_form<type>(HT_GIVENS_ROTATION, &uni, &matr);
 
     size_t iter;
     cin >> iter;
@@ -47,12 +47,12 @@ int main() {
     } else if (k == 2) {
         shift = WILKINSON;
     } else if (k == 3) {
-        shift = IMPLICIT_WILKINSON;
+        shift = FRANCIS;
     }
 
     CALCULATION_MODE cm = WITH_UNIT;
 
-    shift_iterations<double>(iter, 1e-5, false, cm, shift, true, &uni, &matr);
+    shift_iterations<type>(iter, 1e-5, false, cm, shift, false, &uni, &matr);
 
     cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
 

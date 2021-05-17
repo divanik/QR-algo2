@@ -34,6 +34,7 @@ void givens_step(bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_
     rotates.reserve(sz - 1);
 
     for (size_t i = lef; i < rig; i++) {
+        cout << i << endl;
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
@@ -42,18 +43,19 @@ void givens_step(bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_
             a / len,
             c / len
         };
-        left_multiply(rotate, lef, rig, center);
+        left_multiply(rotate, center);
         rotates.push_back(rotate.adjacent());
     }
 
     for (auto x : rotates) {
-        right_multiply(x, lef, rig, center);
+        right_multiply(x, center);
         if (cm == WITH_UNIT) {
             right_multiply(x, unit);
         }
     }
     if (make_each_step_zeros) {
-        fill_hessenberg_zeros(center);
+        //cout << "mesz" << endl;
+        fill_hessenberg_zeros_strings(center, lef, rig);
     }
 }
 
@@ -71,13 +73,10 @@ void rayleigh_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATI
     sub_diag(shift, lef, rig, center);
     givens_step<T>(make_each_step_zeros, lef, rig, cm, unit, center);
     sub_diag(-shift, lef, rig, center);
-    if (make_each_step_zeros) {
-        fill_hessenberg_zeros(center);
-    }   
 }
 
 template<typename T>
-void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
+void wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                         Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     if (rig == lef) {
         return;
@@ -95,14 +94,12 @@ void simple_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, C
     sub_diag(shift, lef, rig, center);
     givens_step(make_each_step_zeros, lef, rig, cm, unit, center);
     sub_diag(-shift, lef, rig, center); 
-    if (make_each_step_zeros) {
-        fill_hessenberg_zeros(center);
-    }
+
 }
 
 //to debug
 template<typename T>
-void double_wilkinson_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
+void francis_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_MODE cm,
                                 Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
 
     auto& center0 = *center;
@@ -197,7 +194,7 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCUL
         return;
     }
 
-    T d = (center0(rig - 1, rig - 1) - center0(rig, rig)) / 2;
+    T d = (center0(rig - 1, rig - 1) - center0(rig, rig)) / T(2);
     T b = center0(rig, rig - 1);
     T shift = center0(rig, rig);
     if (d == T(0)) {
