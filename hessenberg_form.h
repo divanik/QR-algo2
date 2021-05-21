@@ -30,7 +30,7 @@ void fill_hessenberg_zeros_strings(Eigen::MatrixX<T>* center, size_t lef, size_t
     auto& center0 = *center;
     size_t sz = center0.rows();
     for (size_t j = 0; j < sz; j++) {
-        for (size_t i = max(lef, j + 2); i < min(rig + 1, sz); i++) {
+        for (size_t i = std::max(lef, j + 2); i < std::min(rig + 1, sz); i++) {
             center0(i, j) = 0;
         }
     } 
@@ -41,7 +41,7 @@ template<typename T>
 void fill_hessenberg_zeros_columns(Eigen::MatrixX<T>* center, size_t lef, size_t rig) {
     auto& center0 = *center;
     size_t sz = center0.rows();
-    for (size_t j = lef; j < max(rig + 1, sz); j++) {
+    for (size_t j = lef; j < std::max(rig + 1, sz); j++) {
         for (size_t i = j + 2; i < sz; i++) {
             center0(i, j) = 0;
         }
@@ -67,6 +67,9 @@ template<typename T>
 void make_hessenberg_form(HESSENBERG_TRANSFORM ht, Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
     Eigen::MatrixX<T>& center0 = *center;
     size_t size = center0.rows();
+    if (size == 1) {
+        return;
+    }
     if (ht == HT_HOUSEHOLDER_REFLECTION) {
         for (size_t i = 0; i < size - 2; i++) {
             Eigen::VectorX<T> current_vec = center0.block(i + 1, i, size - i - 1, 1);

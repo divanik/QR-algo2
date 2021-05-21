@@ -6,16 +6,18 @@
 #include "Eigen/Core"
 
 #include <complex>
-using namespace Eigen;
-using namespace QR_algorithm;
 
-using type = complex<double>;
+using type = std::complex<double>;
 
 int main() {
+    using std::cout;
+    using std::cin;
+    using std::endl;
+
     int size;
-    cin >> size;
-    MatrixX<type> matr0 = MatrixX<type>::Random(size, size);
-    MatrixX<type> matr = MatrixX<type>::Zero(size, size);
+    std::cin >> size;
+    Eigen::MatrixX<type> matr0 = Eigen::MatrixX<type>::Random(size, size);
+    Eigen::MatrixX<type> matr = Eigen::MatrixX<type>::Zero(size, size);
 
     /*for (int i = 0; i < size; i++) {
         for (int j = i + 1; j < size; j++) {
@@ -33,28 +35,30 @@ int main() {
 
     auto matr_conserve = matr;
 
-    MatrixX<type> uni = MatrixX<type>::Identity(size, size);
+    Eigen::MatrixX<type> uni = Eigen::MatrixX<type>::Identity(size, size);
 
-    make_hessenberg_form<type>(HT_GIVENS_ROTATION, &uni, &matr);
+    QR_algorithm::make_hessenberg_form<type>(QR_algorithm::HT_GIVENS_ROTATION, &uni, &matr);
 
     size_t iter;
-    cin >> iter;
-    SHIFT shift;
+    std::cin >> iter;
+    QR_algorithm::SHIFT shift;
     int k;
-    cin >> k;
+    std::cin >> k;
     if (k == 1) {
-        shift = RAYLEIGH;
+        shift = QR_algorithm::RAYLEIGH;
     } else if (k == 2) {
-        shift = WILKINSON;
+        shift = QR_algorithm::WILKINSON;
     } else if (k == 3) {
-        shift = FRANCIS;
+        shift = QR_algorithm::FRANCIS;
     }
 
-    CALCULATION_MODE cm = WITH_UNIT;
+    QR_algorithm::CALCULATION_MODE cm = QR_algorithm::WITH_UNIT;
 
-    shift_iterations<type>(iter, 1e-5, false, cm, shift, false, &uni, &matr);
+    QR_algorithm::shift_iterations<type>(iter, 1e-5, false, cm, shift, false, &uni, &matr);
 
-    cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << endl << endl;
+
+
+    std::cout << (uni * matr * uni.adjoint() - matr_conserve).norm() << std::endl << std::endl;
 
     cout << matr << endl << endl;
     double err = 0;

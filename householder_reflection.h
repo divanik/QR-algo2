@@ -11,8 +11,6 @@ namespace  QR_algorithm {
 /*template<typename T>
 using MatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;*/
 
-using namespace std;
-
 template<typename T>
 class Householder_reflection {
 

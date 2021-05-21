@@ -6,6 +6,11 @@ using namespace QR_algorithm;
 using namespace Eigen;
 
 int main() {
+    using std::cout;
+    using std::cin;
+    using std::endl;
+    using Eigen::MatrixX;
+
     Manager<type> man;
 
     man.set_accurance(1e-8);
@@ -22,9 +27,18 @@ int main() {
 
     cout << (uni0 * matr0 * uni0.adjoint() - matr_conserve).norm() << endl << endl;
 
-    cout << uni0 * uni0.adjoint() << endl << endl;
+    cout << (uni0 * uni0.adjoint() - Eigen::MatrixX<double>::Identity(size, size)).norm() << endl << endl;
 
-    cout << matr0 << endl << endl << uni0 << endl << endl;
+    double err = 0;
+    for (int i = 1; i < size; i++) {
+        err += abs(matr0(i, i - 1)) * abs(matr0(i, i - 1));
+    }
+
+    cout << err << endl;
+
+
+
+    //cout << matr0 << endl << endl << uni0 << endl << endl;
 
     
 }

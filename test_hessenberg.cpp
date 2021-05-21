@@ -7,6 +7,9 @@ using namespace Eigen;
 using namespace QR_algorithm;
 
 int main() {
+    using std::cout;
+    using std::cin;
+    using std::endl;
     int size;
     cin >> size;
     MatrixXd matr = MatrixXd::Random(size, size);
@@ -15,7 +18,7 @@ int main() {
 
     MatrixXd uni = MatrixXd::Identity(size, size);
 
-    make_hessenberg_form<double>(HOUSEHOLDER_REFLECTION, &uni, &matr);
+    make_hessenberg_form<double>(HT_HOUSEHOLDER_REFLECTION, &uni, &matr);
 
     double err = 0;
     for (int i = 0; i < size - 2; i++) {

@@ -22,6 +22,8 @@ public:
 
     void flush_buffer(bool);
 
+    bool empty();
+
     Iterator begin();
 
     Iterator end();
@@ -92,6 +94,11 @@ void Shift_splitter<T>::flush_buffer(bool pseudo_shur) {
         }
     }
     to_ins.clear();
+}
+
+template <typename T>
+bool Shift_splitter<T>::empty() {
+    return segs.empty();
 }
 
 template <typename T>

@@ -34,7 +34,7 @@ void givens_step(bool make_each_step_zeros, size_t lef, size_t rig, CALCULATION_
     rotates.reserve(sz - 1);
 
     for (size_t i = lef; i < rig; i++) {
-        cout << i << endl;
+        //cout << i << endl;
         T a = center0(i,i);
         T c = center0(i + 1, i);
         T len = sqrt(abs(a) * abs(a) + abs(c) * abs(c));
@@ -142,7 +142,7 @@ void francis_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATIO
     T det = center0(rig - 1, rig - 1) * center0(rig, rig) 
                 - center0(rig - 1, rig) * center0(rig, rig - 1);
 
-    size_t block_size = min(static_cast<size_t>(3), rig - lef + 1);
+    size_t block_size = std::min(static_cast<size_t>(3), rig - lef + 1);
 
     Eigen::VectorX<T> hvec = center0.block(lef, lef, block_size, 1);
     Eigen::VectorX<T> hvec2 = hvec;
@@ -165,7 +165,7 @@ void francis_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCULATIO
     right_multiply(p0, unit);
 
     for (size_t i = lef; i < rig - 1; i++) {
-        block_size = min(static_cast<size_t>(3), rig - i);
+        block_size = std::min(static_cast<size_t>(3), rig - i);
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
         Householder_reflection<T> p = find_householder_reflector(current_vec, 0);

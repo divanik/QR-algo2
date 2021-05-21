@@ -45,7 +45,10 @@ void shift_iterations(size_t steps_number, double eps, bool make_each_step_zeros
     size_t sz = center0.rows();
     Shift_splitter<T> sh_sp(0, sz - 1, center);
     for (size_t step = 0; step < steps_number; step++) {
-        cout << step << endl;
+        //cout << step << endl;
+        if (sh_sp.empty()) {
+            break;
+        }
         for (auto& [lef, rig] : sh_sp) {
             if (shift == NONE) {
                 givens_step(make_each_step_zeros, lef, rig, cm, unit, center);
@@ -66,25 +69,25 @@ void shift_iterations(size_t steps_number, double eps, bool make_each_step_zeros
             sh_sp.split_segs(lef, rig);
         }
         sh_sp.flush_buffer(pseudo_shur);
-        for (auto& [lef, rig] : sh_sp) {
+        /*for (auto& [lef, rig] : sh_sp) {
             cout << lef << " " << rig << endl << endl;
             cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
             cout << center0(rig, lef) << " " << center0(rig, rig) << endl;
             cout << endl;
         }
-        cout << endl;
-    }
-    for (auto& [lef, rig] : sh_sp) {
-        /*cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
-        cout << center0(rig, lef) << " " << center0(rig, rig) << endl;
         cout << endl;*/
+    }
+    /*for (auto& [lef, rig] : sh_sp) {
+        cout << center0(lef, lef) << " " << center0(lef, rig) << endl;
+        cout << center0(rig, lef) << " " << center0(rig, rig) << endl;
+        cout << endl;
 
         //cout << lef << " " << rig << endl << endl;
         
-        /*cout << (center0(lef, lef) - center0(rig, rig)) * (center0(lef, lef) - center0(rig, rig)) + 
-                4 * center0(rig, lef) *  center0(lef, rig) << endl << (center0(lef, lef) + center0(rig, rig)) << endl;*/
+        cout << (center0(lef, lef) - center0(rig, rig)) * (center0(lef, lef) - center0(rig, rig)) + 
+                4 * center0(rig, lef) *  center0(lef, rig) << endl << (center0(lef, lef) + center0(rig, rig)) << endl;
     }
-    cout << endl;
+    //cout << endl;*/
 }
 
 
@@ -95,10 +98,13 @@ void symmetrical_iterations(const size_t steps_number, double eps, bool make_eac
     size_t sz = center0.rows();
     Shift_splitter<T> sh_sp(0, sz - 1, center);
     for (size_t step = 0; step < steps_number; step++) {
+        if (sh_sp.empty()) {
+            break;
+        }
         for (auto& [lef, rig] : sh_sp) {
             symmetrical_step(make_each_step_zeros, lef, rig, cm, unit, center);         
             for (int i = lef; i < rig; i++) {
-                if (max(abs(center0(i + 1, i)), abs(center0(i, i + 1)))  < eps) {
+                if (std::max(abs(center0(i + 1, i)), abs(center0(i, i + 1)))  < eps) {
                     sh_sp.fill_splitter(i);
                 }
             }
