@@ -20,7 +20,7 @@ public:
         symmetry_mode = mode;
     }
 
-    bool change_calculation_mode(const std::string& mode) {
+    bool set_calculation_mode(const std::string& mode) {
         if (mode == "eigenvalues_only") {
             calculation_mode = EIGENVALUES_ONLY;
             return true;
@@ -35,12 +35,24 @@ public:
         }
     }
 
-    bool change_hessenberg_transform(const std::string& transform) {
+    bool set_hessenberg_transform(const std::string& transform) {
         if (transform == "householder") {
             hessenberg_transform = HT_HOUSEHOLDER_REFLECTION;
             return true;
         } else if (transform == "givens") {
             hessenberg_transform = HT_GIVENS_ROTATION;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool set_qr_transform(const std::string& transform) {
+        if (transform == "householder") {
+            qr_transform = QR_HOUSEHOLDER_REFLECTION;
+            return true;
+        } else if (transform == "givens") {
+            qr_transform = QR_GIVENS_ROTATION;
             return true;
         } else {
             return false;
@@ -67,12 +79,6 @@ public:
 
     void set_maximum_iterations(size_t max_iterations_) {
         max_iterations = max_iterations_;
-        max_iterations_set = true;
-    }
-
-    void unset_maximum_iterations() {
-        max_iterations = 0;
-        max_iterations_set = false;
     }
 
     void set_each_step_zeros_mode(bool make_each_step_zeros_) {
@@ -80,14 +86,16 @@ public:
     }
 
     void set_accurance (double accurance_) {
-        accurance = accurance_;
+        if (accurance_ >= 0) {
+            accurance = accurance_;
+        } else {
+            accurance = 0;
+        }
     }
 
     void set_pseudo_shur_mode (bool pseudo_shur_) {
         pseudo_shur = pseudo_shur_;
     }
-
-
 
     void shur_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit);
 
@@ -104,7 +112,6 @@ private:
     CALCULATION_MODE calculation_mode = WITH_UNIT;
     SHIFT shift_mode = WILKINSON;
     double accurance = 1e-4;
-    bool max_iterations_set = false;
     size_t max_iterations = 1000;
     bool make_each_step_zeros = false;
     HESSENBERG_TRANSFORM hessenberg_transform = HT_HOUSEHOLDER_REFLECTION;
@@ -125,15 +132,11 @@ void Manager<T>::shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::Ma
         *unit = Eigen::MatrixX<T>::Identity(check_size, check_size);
     }
 
-    //cout << "ok" << endl;
-
     if (calculation_mode != WITH_UNIT) {
         make_hessenberg_form<T>(hessenberg_transform, nullptr, center);
     } else {
         make_hessenberg_form<T>(hessenberg_transform, unit, center);
     }
-
-    //cout << "ok3" << endl;
 
     if (symmetry_mode) {
         if (calculation_mode != WITH_UNIT) {
@@ -145,10 +148,8 @@ void Manager<T>::shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::Ma
         }
     } else {
         if (calculation_mode == WITH_UNIT) {
-            //cout << "ok1" << endl;
             shift_iterations<T>(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                         shift_mode, pseudo_shur, unit, center);
-            //cout << "ok2" << endl;
         } else {
             shift_iterations<T>(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                         shift_mode, pseudo_shur, nullptr, center);         
@@ -192,16 +193,10 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
         size_t size = center_matrix.rows();
         Eigen::MatrixX<T> unit_matrix = Eigen::MatrixX<T>::Identity(size, size);
 
-        //set_symmetry_mode(true);
-        // std::cout << "ok1" << std::endl;
+        set_symmetry_mode(false);
         shur_decomposition_inplace(&center_matrix, &unit_matrix);
-        // std::cout << "ok2" << std::endl;
         //std::cout << (center_matrix_conserve - unit_matrix * center_matrix * unit_matrix.adjoint()).norm() << std::endl;
-        //std::cout << (unit_matrix * unit_matrix.adjoint() - Eigen::MatrixX<double>::Identity(size, size)).norm() << std::endl << std::endl;
-
-        //std::cout << center_matrix << std::endl << std::endl;
-        //set_symmetry_mode(false);
-        //std::cout << "ok" << std::endl;
+        set_symmetry_mode(true);
 
         std::vector<std::pair<T, int>> sing_values_with_indeces(size);
         for (int i = 0; i < size; i++) {
@@ -210,19 +205,12 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
         }
         std::sort(sing_values_with_indeces.begin(), sing_values_with_indeces.end(), [](std::pair<T, size_t> a, std::pair<T, size_t> b){
             return abs(a.first) > abs(b.first);
-        });
-
-        /*for (auto x : sing_values_with_indeces) {
-            std::cout << '(' << x.first << ", " << x.second << ") " << std::endl;
-        }*/
-        //std::cout << endl << "ok2" << std::endl;        
+        });     
 
         for (int i = 0; i < size; i++) {
             singular_values_ref[i] = sqrt(sing_values_with_indeces[i].first);
             U->col(i) = unit_matrix.col(sing_values_with_indeces[i].second);
         }
-
-        //std::cout << ((*U) * U->adjoint() - Eigen::MatrixX<double>::Identity(size, size)).norm() << std::endl << std::endl;
 
         Eigen::MatrixX<T> res_center = Eigen::MatrixX<T>::Zero(size, size);
 
@@ -230,24 +218,9 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
             res_center(i, i) = singular_values_ref[i];
         }
 
-        //cout << unit_matrix << endl << endl;
-
-        //cout << *U << endl << endl;
-
-        //cout << res_center * res_center << endl << endl;
-        //cout << center_matrix << endl << endl;
-
-        //std::cout << (matrix * matrix.adjoint() - (*U) * res_center * res_center * U->adjoint()).norm() << std::endl;
-        //std::cout << (matrix * matrix.adjoint() - unit_matrix * center_matrix * unit_matrix.adjoint()).norm() << std::endl;
-
         *Vh = U->adjoint() * matrix;
-
-        //std::cout << (*Vh) * Vh->adjoint() << std::endl << std::endl;
-
         const Eigen::RowVectorX<T> zero_row = Eigen::MatrixX<T>::Zero(1, Vh->cols());
         const Eigen::VectorX<T> zero_col = Eigen::MatrixX<T>::Zero(U->rows(), 1);
-
-        //std::cout << "ok4" << std::endl;  
 
         int answer = 0;
         for (int i = 0; i < size; i++) {
@@ -263,11 +236,9 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
     } else {
         Eigen::MatrixX<T> Vhextra = Vh->adjoint();
         Eigen::MatrixX<T> Uextra  = U->adjoint();
-        // << "ok1" << endl;
 
         size_t answer = svd_decomposition(matrix.adjoint(), &Vhextra, singular_values, &Uextra);
 
-        //cout << "ok2" << endl;
         *Vh = Vhextra.adjoint();
         *U  = Uextra.adjoint();
         return answer;

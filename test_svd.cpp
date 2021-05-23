@@ -1,6 +1,6 @@
 #include "manager.h"
 
-using type = std::complex<double>;
+using type = double;
 
 int main() {
     using namespace QR_algorithm;
@@ -27,15 +27,19 @@ int main() {
 
     man.svd_decomposition(matr_conserve, &U, &sing_values, &Vh);
     //size_t sz = min(size1, size2);
-    cout << (U.adjoint() * U - Eigen::MatrixX<type>::Identity(sz, sz)).norm() << endl << endl;
-    cout << (Vh * Vh.adjoint() - Eigen::MatrixX<type>::Identity(sz, sz)).norm() << endl << endl;
+    cout << (U.adjoint() * U - Eigen::MatrixX<type>::Identity(sz, sz)).norm() << endl << endl; // Checking that U is unit
+    cout << (Vh * Vh.adjoint() - Eigen::MatrixX<type>::Identity(sz, sz)).norm() << endl << endl; // Checking that V is unit
 
     for (size_t i = 0; i < sz; i++) {
         Vh.row(i) *= sing_values[i];
     }
 
-    cout << (matr_conserve - U * Vh).norm() << endl;
+    cout << (matr_conserve - U * Vh).norm() << endl; // Checking that SVD has been counted correctly
 
+    for (auto x : sing_values) {
+        cout << x << " ";
+    }
+    cout << endl;
     
 }
 

@@ -209,26 +209,22 @@ void symmetrical_step (bool make_each_step_zeros, size_t lef, size_t rig, CALCUL
     Givens_rotation<T> p0 = find_givens_rotations(hvec, 1)[0];
     p0.make_shift(lef);
 
-    if (cm == EIGENVALUES_ONLY) {
-        left_multiply(p0, lef, rig, /*lef_bord, rig_bord,*/ center);
-        right_multiply(p0.adjacent(), lef, rig, /*lef_bord, rig_bord,*/ center);
-    } 
-
+    left_multiply(p0, /*lef, rig,*/ /*lef_bord, rig_bord,*/ center);
+    right_multiply(p0.adjacent(), /*lef, rig,*/ /*lef_bord, rig_bord,*/ center);
     right_multiply(p0.adjacent(), unit);
 
     for (int i = lef; i < rig - 1; i++) {
+        using std::cout;
+        using std::endl;
         size_t block_size = 2;
         Eigen::VectorX<T> current_vec = center0.block(i + 1, i, block_size, 1);
 
         Givens_rotation<T> p = find_givens_rotations(current_vec, 1)[0];
         p.make_shift(i + 1);
-        //lef_bord = static_cast<size_t>(max(static_cast<int>(lef), i - 2));
-        //rig_bord = static_cast<size_t>(min(static_cast<int>(rig), i + 2));
-        if (cm == EIGENVALUES_ONLY) {
-            left_multiply(p, lef, rig, /*lef_bord, rig_bord,*/ center);
-            right_multiply(p.adjacent(), lef, rig, /*lef_bord, rig_bord,*/ center);
-        } 
-
+        size_t lef_bord = static_cast<size_t>(std::max(static_cast<int>(lef), i - 3));
+        size_t rig_bord = static_cast<size_t>(std::min(static_cast<int>(rig), i + 3));
+        left_multiply(p, /*lef, rig,*/ lef_bord, rig_bord, center);
+        right_multiply(p.adjacent(), /*lef, rig,*/ lef_bord, rig_bord, center);
         right_multiply(p.adjacent(), unit);
     }
 

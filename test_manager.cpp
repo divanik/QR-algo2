@@ -13,25 +13,27 @@ int main() {
 
     Manager<type> man;
 
-    man.set_accurance(1e-8);
+    man.set_accurance(1e-4);
     man.set_shift("wilkinson");
+    man.set_maximum_iterations(10000);
 
     int size;
     cin >> size;
-    MatrixX<type> matr0 = MatrixX<double>::Random(size, size);
-    MatrixX<type> uni0 = MatrixX<double>::Zero(size, size);
+    MatrixX<type> matr = MatrixX<double>::Random(size, size);
+    MatrixX<type> uni = MatrixX<double>::Zero(size, size);
+    MatrixX<type> center = MatrixX<double>::Zero(size, size);
 
-    auto matr_conserve = matr0;
+    man.shur_decomposition(matr, &center, &uni);
 
-    man.shur_decomposition_inplace(&matr0, &uni0);
 
-    cout << (uni0 * matr0 * uni0.adjoint() - matr_conserve).norm() << endl << endl;
 
-    cout << (uni0 * uni0.adjoint() - Eigen::MatrixX<double>::Identity(size, size)).norm() << endl << endl;
+    cout << (uni * center * uni.adjoint() - matr).norm() << endl << endl;
+
+    cout << (uni * uni.adjoint() - Eigen::MatrixX<double>::Identity(size, size)).norm() << endl << endl;
 
     double err = 0;
     for (int i = 1; i < size; i++) {
-        err += abs(matr0(i, i - 1)) * abs(matr0(i, i - 1));
+        err += abs(center(i, i - 1)) * abs(center(i, i - 1));
     }
 
     cout << err << endl;
