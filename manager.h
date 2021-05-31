@@ -139,7 +139,7 @@ void Manager<T>::shur_decomposition_inplace(Eigen::MatrixX<T>* center, Eigen::Ma
     }
 
     if (symmetry_mode) {
-        if (calculation_mode != WITH_UNIT) {
+        if (calculation_mode == WITH_UNIT) {
             symmetrical_iterations<T>(max_iterations, accurance, make_each_step_zeros, calculation_mode,
                                 unit, center);
         } else {
@@ -180,7 +180,7 @@ void Manager<T>::qr_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Matrix
     assert(matrix.rows() == center->rows());
     assert(matrix.cols() == center->cols());
     *center = matrix;
-    shur_decomposition_inplace(center, unit);
+    qr_decomposition_inplace(center, unit);
 }
 
 template<typename T>
@@ -193,10 +193,10 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
         size_t size = center_matrix.rows();
         Eigen::MatrixX<T> unit_matrix = Eigen::MatrixX<T>::Identity(size, size);
 
-        set_symmetry_mode(false);
+        set_symmetry_mode(true);
         shur_decomposition_inplace(&center_matrix, &unit_matrix);
         //std::cout << (center_matrix_conserve - unit_matrix * center_matrix * unit_matrix.adjoint()).norm() << std::endl;
-        set_symmetry_mode(true);
+        set_symmetry_mode(false);
 
         std::vector<std::pair<T, int>> sing_values_with_indeces(size);
         for (int i = 0; i < size; i++) {
