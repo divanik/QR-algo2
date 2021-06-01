@@ -31,9 +31,7 @@ void find_full_qr_decomposition(QR_TRANSFORM qr_tr, Eigen::MatrixX<T>* unit, Eig
         }
     } else if (qr_tr == QR_GIVENS_ROTATION) {
         for (size_t i = 0; i < std::min(rows, cols); i++) {
-
             Eigen::VectorX<T> current_vec = center0.block(i, i, rows - i, 1);
-
             std::vector<Givens_rotation<T>> cur_rots = find_givens_rotations(current_vec, 1);
 
             for (auto& x : cur_rots) {
@@ -45,13 +43,5 @@ void find_full_qr_decomposition(QR_TRANSFORM qr_tr, Eigen::MatrixX<T>* unit, Eig
         }     
     }
 }
-
-/*template<typename T>
-void find_thin_qr_decomposition(QR_TRANSFORM qr_tr, Eigen::MatrixX<T>* unit, Eigen::MatrixX<T>* center) {
-    Eigen::MatrixX<T>& center0 = *center;
-    if (rows <= cols) {
-        find_full_qr(qr_tr, unit, center);
-    }
-}*/
 
 }
