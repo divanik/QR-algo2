@@ -21,11 +21,9 @@ bool test_qr() {
 
     std::vector<std::pair<int, int>> sizes = {{3, 3}, {3, 7}, {7, 3}, {50, 50}, {10, 20}, {20, 10}, {100, 150}, {200, 100}, {150, 200}};
 
-    //cout << "ok" << endl;    
     for (auto size : sizes) {
         size_t size1 = size.first;
         size_t size2 = size.second;
-        //cout << size1 << " " << size2 << endl;
         MatrixX<type> matr = MatrixX<type>::Random(size1, size2);
         MatrixX<type> uni = MatrixX<type>::Zero(size1, size1);
         MatrixX<type> center = MatrixX<type>::Zero(size1, size2);

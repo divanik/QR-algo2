@@ -107,6 +107,8 @@ public:
 
     size_t svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::MatrixX<T>* U, std::vector<T>* singular_values, Eigen::MatrixX<T>* Vh);
 
+    void eigenvalues(const Eigen::MatrixX<T>& matrix, std::vector<T>* eigenvalues);
+
 private:
     bool symmetry_mode = false;
     CALCULATION_MODE calculation_mode = WITH_UNIT;
@@ -176,6 +178,19 @@ void Manager<T>::shur_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Matr
 }
 
 template<typename T>
+void Manager<T>::eigenvalues(const Eigen::MatrixX<T>& matrix, std::vector<T>* eigenvalues) {
+    assert(matrix.rows() == matrix.cols());
+    Eigen::MatrixX<T> center = matrix;
+    auto old_calc_mode = calculation_mode;
+    calculation_mode = WITHOUT_UNIT;
+    shur_decomposition_inplace(&center, nullptr);
+    calculation_mode = old_calc_mode;
+    for (size_t i = 0; i < matrix.rows(); i++) {
+        (*eigenvalues)[i] = center(i, i);
+    }
+}
+
+template<typename T>
 void Manager<T>::qr_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::MatrixX<T>* center, Eigen::MatrixX<T>* unit) {
     assert(matrix.rows() == center->rows());
     assert(matrix.cols() == center->cols());
@@ -193,10 +208,15 @@ size_t Manager<T>::svd_decomposition(const Eigen::MatrixX<T>& matrix, Eigen::Mat
         size_t size = center_matrix.rows();
         Eigen::MatrixX<T> unit_matrix = Eigen::MatrixX<T>::Identity(size, size);
 
+        bool old_symmetry_mode = symmetry_mode;
+        auto old_calc_mode = calculation_mode;
         set_symmetry_mode(true);
+        set_calculation_mode("with_unit");
+
         shur_decomposition_inplace(&center_matrix, &unit_matrix);
-        //std::cout << (center_matrix_conserve - unit_matrix * center_matrix * unit_matrix.adjoint()).norm() << std::endl;
-        set_symmetry_mode(false);
+
+        set_symmetry_mode(old_symmetry_mode);
+        calculation_mode = old_calc_mode;
 
         std::vector<std::pair<T, int>> sing_values_with_indeces(size);
         for (int i = 0; i < size; i++) {
