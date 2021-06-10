@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# Debugging and running
+*.json
+
+Eigen/*
+
+.gitignore
+
+kek*
